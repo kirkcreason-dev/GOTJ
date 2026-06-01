@@ -160,6 +160,27 @@
   .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-90px);background:var(--blood);color:#fff;font-family:'Oswald';font-weight:700;letter-spacing:.05em;font-size:13px;padding:13px 24px;border-radius:40px;z-index:200;transition:transform .28s cubic-bezier(.2,.8,.4,1);box-shadow:0 8px 28px rgba(0,0,0,.55);text-align:center;max-width:88vw;pointer-events:none}
   .toast.show{transform:translateX(-50%) translateY(0)}
 
+  /* ---- search ---- */
+  .map-head{flex-wrap:wrap;gap:8px 12px}
+  .searchbox{position:relative;display:flex;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:0 8px;gap:6px;flex:1;min-width:180px;max-width:340px;transition:border-color .15s}
+  .searchbox:focus-within{border-color:var(--gold);box-shadow:0 0 0 2px rgba(232,198,106,.18)}
+  .sicon{font-size:14px;flex:none;opacity:.6}
+  .searchbox input{flex:1;background:transparent;border:0;outline:0;color:var(--ink);font-family:'Special Elite';font-size:14px;padding:9px 0;min-width:0}
+  .searchbox input::placeholder{color:var(--muted);font-size:13px}
+  .sclear{background:transparent;border:0;color:var(--muted);font-size:18px;cursor:pointer;padding:0 2px;line-height:1;display:none;flex:none}
+  .sclear.vis{display:block}
+  .sclear:hover{color:var(--ink)}
+  .sresults{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;list-style:none;margin:0;padding:4px 0;z-index:30;box-shadow:0 12px 36px rgba(0,0,0,.55);max-height:280px;overflow-y:auto;display:none}
+  .sresults.open{display:block}
+  .sresults li{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;font-size:13px;transition:.12s;border-bottom:1px dashed rgba(74,58,34,.35)}
+  .sresults li:last-child{border-bottom:0}
+  .sresults li:hover,.sresults li.active{background:var(--panel2)}
+  .sresults li .sdot{width:10px;height:10px;border-radius:50%;flex:none}
+  .sresults li .sname{font-family:'Oswald';font-weight:700;font-size:13px;flex:1}
+  .sresults li .scat{font-family:'Oswald';font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .sresults li .smatch{color:var(--gold)}
+  .sno{padding:12px 14px;color:var(--muted);font-size:13px;text-align:center}
+
   /* ---- tabs ---- */
   .tabbar{display:flex;gap:0;margin:18px 0 0;border-bottom:2px solid var(--line);overflow-x:auto}
   .tab{font-family:'Oswald';font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:13px;background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--muted);padding:12px 22px;cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
@@ -199,6 +220,12 @@
       <div class="mapcard">
         <div class="map-head">
           <h2>The Grounds</h2>
+          <div class="searchbox" id="searchbox">
+            <span class="sicon">🔍</span>
+            <input id="searchInput" type="text" placeholder="Search bands, food, stages…" autocomplete="off" spellcheck="false">
+            <button class="sclear" id="sclear" aria-label="Clear search">×</button>
+            <ul class="sresults" id="sresults"></ul>
+          </div>
         </div>
         <div class="stage-wrap" id="stageWrap">
           <div class="zoom" id="zoom">
@@ -629,6 +656,103 @@
     });
   });
 
-  load(function(){ buildDays(); buildChips(); renderPins(); renderGuide(); });
+  load(function(){
+    buildDays(); buildChips(); renderPins(); renderGuide();
+
+    // ---- search ----
+    var sinput=document.getElementById('searchInput');
+    var sresults=document.getElementById('sresults');
+    var sclear=document.getElementById('sclear');
+    var activeIdx=-1;
+
+    function searchScore(p, q){
+      // returns 0 if no match; higher = better match
+      var haystack=[p.name, p.desc||'', (p.lineup||[]).join(' '), CATS[p.cat].label].join(' ').toLowerCase();
+      var needle=q.toLowerCase().trim();
+      if(!needle) return 0;
+      if(p.name.toLowerCase().indexOf(needle)===0) return 100;
+      if(p.name.toLowerCase().indexOf(needle)!==-1) return 80;
+      // check each word of the query individually
+      var words=needle.split(/\s+/);
+      var hits=words.filter(function(w){ return haystack.indexOf(w)!==-1; });
+      if(hits.length===words.length) return 60;
+      if(hits.length>0) return 20*hits.length/words.length;
+      return 0;
+    }
+
+    function highlight(text, q){
+      var idx=text.toLowerCase().indexOf(q.toLowerCase());
+      if(idx===-1) return esc(text);
+      return esc(text.slice(0,idx))+'<span class="smatch">'+esc(text.slice(idx,idx+q.length))+'</span>'+esc(text.slice(idx+q.length));
+    }
+
+    function doSearch(q){
+      q=q.trim();
+      sclear.classList.toggle('vis', q.length>0);
+      if(!q){ sresults.classList.remove('open'); sresults.innerHTML=''; activeIdx=-1; return; }
+      var scored=pins.map(function(p){ return {p:p, s:searchScore(p,q)}; })
+                     .filter(function(x){ return x.s>0; })
+                     .sort(function(a,b){ return b.s-a.s; })
+                     .slice(0,8);
+      activeIdx=-1;
+      if(!scored.length){
+        sresults.innerHTML='<li class="sno">No results for "'+esc(q)+'"</li>';
+        sresults.classList.add('open'); return;
+      }
+      sresults.innerHTML=scored.map(function(x,i){
+        var p=x.p, c=CATS[p.cat];
+        // also highlight matches inside lineup acts
+        var actMatch='';
+        (p.lineup||[]).forEach(function(a){
+          if(a.toLowerCase().indexOf(q.toLowerCase())!==-1)
+            actMatch='<span class="scat" style="color:var(--acid)">🎤 '+highlight(a,q)+'</span>';
+        });
+        return '<li data-i="'+i+'" data-id="'+p.id+'" tabindex="-1">'+
+          '<span class="sdot" style="background:'+c.color+'"></span>'+
+          '<span class="sname">'+highlight(p.name,q)+'</span>'+
+          (actMatch||'<span class="scat">'+c.label+'</span>')+
+          '</li>';
+      }).join('');
+      sresults.classList.add('open');
+    }
+
+    function pickResult(id){
+      sresults.classList.remove('open');
+      sinput.value=''; sclear.classList.remove('vis'); activeIdx=-1;
+      var p=pins.find(function(x){return x.id===id;}); if(!p) return;
+      // switch to map tab if not already there
+      [].forEach.call(document.querySelectorAll('.tab'),function(b){ b.classList.remove('active'); });
+      [].forEach.call(document.querySelectorAll('.tabpanel'),function(p){ p.classList.remove('active'); });
+      document.querySelector('.tab[data-tab="map"]').classList.add('active');
+      document.getElementById('tab-map').classList.add('active');
+      // pan & zoom to pin
+      var wrap=document.getElementById('stageWrap');
+      var ww=wrap.clientWidth, wh=wrap.clientHeight;
+      var nz=Math.max(ZM.z, 2.5);
+      var px=p.x/100*ww*nz, py=p.y/100*wh*nz;
+      ZM.z=nz;
+      ZM.tx=Math.min(0,Math.max(ww-ww*nz, ww/2-px));
+      ZM.ty=Math.min(0,Math.max(wh-wh*nz, wh/2-py));
+      applyZ();
+      openDetail(id);
+    }
+
+    sinput.addEventListener('input',function(){ doSearch(sinput.value); });
+    sinput.addEventListener('keydown',function(e){
+      var items=sresults.querySelectorAll('li[data-id]');
+      if(e.key==='ArrowDown'){ e.preventDefault(); activeIdx=Math.min(activeIdx+1,items.length-1); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); activeIdx=Math.max(activeIdx-1,-1); }
+      else if(e.key==='Enter' && activeIdx>=0){ e.preventDefault(); pickResult(items[activeIdx].getAttribute('data-id')); return; }
+      else if(e.key==='Escape'){ sresults.classList.remove('open'); sinput.blur(); return; }
+      [].forEach.call(items,function(li,i){ li.classList.toggle('active',i===activeIdx); });
+    });
+    sclear.addEventListener('click',function(){ sinput.value=''; doSearch(''); sinput.focus(); });
+    sresults.addEventListener('click',function(e){
+      var li=e.target.closest('li[data-id]'); if(li) pickResult(li.getAttribute('data-id'));
+    });
+    document.addEventListener('click',function(e){
+      if(!e.target.closest('#searchbox')) sresults.classList.remove('open');
+    });
+  });
 })();
 </script>
