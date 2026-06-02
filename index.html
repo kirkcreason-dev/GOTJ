@@ -59,7 +59,8 @@
   @keyframes pulse{50%{opacity:.55}}
 
   /* map = real image base layer + pin overlay, pan/zoomable */
-  .stage-wrap{position:relative;width:100%;line-height:0;background:#1c150d;overflow:hidden;touch-action:none}
+  .stage-wrap{position:relative;width:100%;line-height:0;background:#1c150d;overflow:hidden;touch-action:none;max-height:72vh}
+  @media(max-width:860px){.stage-wrap{max-height:55vw}}
   .zoom{position:relative;transform-origin:0 0;transform:translate(var(--tx,0px),var(--ty,0px)) scale(var(--z,1));cursor:default}
   .zoom.zoomed{cursor:grab}
   .zoom.grabbing{cursor:grabbing}
@@ -372,20 +373,20 @@
     {id:"otherflavor", name:"Other Flavor", cat:"attraction", x:63, y:50, hours:"All weekend",
       status:"Coming soon",
       desc:"Surprise events, one-off happenings and extra 'flavor' added throughout the weekend.", ev:[]},
-    {id:"swim-butcher", name:"Swimming \u2013 Butcher Beach", cat:"attraction", x:14, y:30, hours:"Daytime",
+    {id:"swim-butcher", name:"Swimming \u2013 Butcher Beach", cat:"attraction", x:11, y:36, hours:"Daytime",
       status:"New for 2026",
       desc:"Swim at Butcher Beach on the Rosemary River \u2014 one of the new water activities this year. Swim at your own risk and follow posted rules.", ev:[]},
     {id:"swim-loony", name:"Swimming \u2013 Loony Beach", cat:"attraction", x:92, y:73, hours:"Daytime",
       status:"New for 2026",
       desc:"Swimming beach on the east shore of the Rosemary River \u2014 new for 2026.", ev:[]},
-    {id:"paddle", name:"Kayaking & Canoeing", cat:"attraction", x:25, y:23, hours:"Daytime",
+    {id:"paddle", name:"Kayaking & Canoeing", cat:"attraction", x:28, y:20, hours:"Daytime",
       status:"New for 2026",
       desc:"Kayaking and canoeing on the Rosemary River \u2014 part of the new water activities added this year.", ev:[]},
 
     // ---- CAMPGROUNDS ----
-    {id:"butcherbeach", name:"Butcher Beach", cat:"camp", x:13, y:28, hours:"Open all weekend",
+    {id:"butcherbeach", name:"Butcher Beach", cat:"camp", x:10, y:38, hours:"Open all weekend",
       desc:"Beach camping on the Rosemary River, with a swimming beach right there.", ev:[]},
-    {id:"butcherbaycg", name:"Butcher Bay Campground", cat:"camp", x:26, y:30, hours:"Open all weekend",
+    {id:"butcherbaycg", name:"Butcher Bay Campground", cat:"camp", x:26, y:29, hours:"Open all weekend",
       desc:"Car Pass camping close to the stages. Spots are first-come, first-served \u2014 they fill starting at Butcher Bay and work outward.", ev:[]},
     {id:"typeshit", name:"Type Shit Campground", cat:"camp", x:30, y:47, hours:"Open all weekend",
       desc:"Car Pass camping near the stages. Supa Balla sites (electric + water + sewage) are also located here.", ev:[]},
@@ -405,7 +406,7 @@
     // ---- FOOD ----
     {id:"food-w", name:"Food Court (West)", cat:"food", x:36, y:38, hours:"Open all weekend", desc:"Food and drink vendors. Vendor lineup announced closer to the event.", ev:[]},
     {id:"food-n", name:"Food Court (North)", cat:"food", x:57, y:45, hours:"Open all weekend", desc:"Food and drink vendors. Vendor lineup announced closer to the event.", ev:[]},
-    {id:"food-e", name:"Food Court (East)", cat:"food", x:72, y:38, hours:"Open all weekend", desc:"Food and drink vendors. Vendor lineup announced closer to the event.", ev:[]},
+    {id:"food-e", name:"Food Court (East)", cat:"food", x:72, y:37, hours:"Open all weekend", desc:"Food and drink vendors. Vendor lineup announced closer to the event.", ev:[]},
     {id:"food-s", name:"Food Court (South)", cat:"food", x:41, y:70, hours:"Open all weekend", desc:"Food and drink vendors. Vendor lineup announced closer to the event.", ev:[]},
 
     // ---- FACILITIES ----
