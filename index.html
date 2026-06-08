@@ -853,17 +853,35 @@
   var feedEmpty = document.getElementById('feedEmpty');
 
   var _seenAlerts = {};
-  function addAlertToFeed(a){
-    if (a && a.id){ if (_seenAlerts[a.id]) return; _seenAlerts[a.id] = 1; }
+  var ALERT_KEY = 'gotj_alerts_v1';
+  var feedAlerts = [];               // newest-first, persisted
+  function loadAlertStore(){ try { var s = localStorage.getItem(ALERT_KEY); return s ? JSON.parse(s) : []; } catch(e){ return []; } }
+  function saveAlertStore(){ try { localStorage.setItem(ALERT_KEY, JSON.stringify(feedAlerts)); } catch(e){} }
+  function renderAlertCard(a){
     if (feedEmpty) feedEmpty.style.display = 'none';
     var card = document.createElement('div'); card.className = 'alert-card';
     var t = document.createElement('div'); t.className = 'ac-title'; t.textContent = a.t || 'GOTJ Alert';
     var b = document.createElement('div'); b.className = 'ac-body'; b.textContent = a.b || '';
     var ts = document.createElement('div'); ts.className = 'ac-time';
-    ts.textContent = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    ts.textContent = new Date(a.ts || Date.now()).toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit'});
     card.appendChild(t); card.appendChild(b); card.appendChild(ts);
-    feed.insertBefore(card, feed.firstChild);
+    feed.insertBefore(card, feed.firstChild);   // newest on top
   }
+  function addAlertToFeed(a){
+    if (a && a.id){ if (_seenAlerts[a.id]) return; _seenAlerts[a.id] = 1; }
+    if (!a.ts) a.ts = Date.now();
+    renderAlertCard(a);
+    feedAlerts.unshift({ t:a.t, b:a.b, id:a.id, ts:a.ts });
+    if (feedAlerts.length > 300) feedAlerts.length = 300;
+    saveAlertStore();
+  }
+  (function restoreFeed(){
+    feedAlerts = loadAlertStore();
+    for (var i = feedAlerts.length - 1; i >= 0; i--){           // oldest first so newest ends on top
+      if (feedAlerts[i].id) _seenAlerts[feedAlerts[i].id] = 1;
+      renderAlertCard(feedAlerts[i]);
+    }
+  })();
 
   function updateAlertUI(){
     var granted = canNotify && Notification.permission === 'granted';
