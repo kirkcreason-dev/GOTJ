@@ -4,7 +4,7 @@
    locally via registration.showNotification(); the 'push' listener below is the
    hook a backend (Firebase Cloud Messaging) will use to broadcast to every fan. */
 
-const CACHE = 'gotj-2026-v1';
+const CACHE = 'gotj-2026-v2';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {

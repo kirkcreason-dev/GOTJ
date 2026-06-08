@@ -154,6 +154,13 @@
   .rev-card .ri{font-size:26px;margin-bottom:8px;display:block}
   .rev-card .rt{font-family:'Oswald';font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--gold);margin-bottom:6px}
   .rev-card .rd{font-size:13px;color:var(--muted);margin:0;line-height:1.5}
+  .rev-lead{color:var(--muted);font-size:14px;line-height:1.55;text-align:center;max-width:560px;margin:0 auto 18px}
+  .rev-card{transition:transform .15s,border-color .15s;position:relative}
+  .rev-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+  .rev-card.flagship{border-color:var(--amber);box-shadow:var(--glow) rgba(232,162,58,.20)}
+  .rev-tag{display:inline-block;font-family:'Oswald';font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:9px;color:#1a1206;background:var(--amber);border-radius:999px;padding:3px 10px;margin-bottom:9px}
+  .rev-foot{text-align:center;color:var(--ink);font-size:13.5px;line-height:1.55;margin:18px auto 6px;max-width:520px}
+  .rev-foot strong{color:var(--gold);font-family:'Oswald';letter-spacing:.04em}
 
   /* ---- emergency buttons ---- */
   .emer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin-bottom:12px}
@@ -238,6 +245,25 @@
   .ac-title{font-family:'Oswald';font-weight:700;color:var(--ink);font-size:14.5px;letter-spacing:.03em}
   .ac-body{color:var(--muted);font-size:13px;line-height:1.45}
   .ac-time{color:var(--line);font-size:11px;font-family:'Oswald';letter-spacing:.05em;text-transform:uppercase}
+  .cscrim{position:fixed;inset:0;background:rgba(0,0,0,.62);opacity:0;pointer-events:none;transition:.2s;z-index:60}
+  .cscrim.show{opacity:1;pointer-events:auto}
+  .cbox{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);width:min(460px,92vw);
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;z-index:61;
+    opacity:0;pointer-events:none;transition:.2s;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .cbox.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+  .cbox h3{font-family:'Pirata One';color:var(--gold);font-size:23px;margin:0 0 3px;font-weight:400}
+  .cbox .clab{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:11px}
+  .cbox textarea{width:100%;min-height:96px;resize:vertical;background:var(--bg);color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;line-height:1.45}
+  .cbox textarea:focus{outline:none;border-color:var(--amber)}
+  .ccount{text-align:right;color:var(--muted);font-size:11px;margin-top:4px}
+  .crow{display:flex;gap:10px;margin-top:14px}
+  .cbtn{flex:1;font-family:'Oswald';font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    font-size:13px;border:0;border-radius:999px;padding:12px;cursor:pointer;transition:.15s}
+  .cbtn.send{background:var(--amber);color:#1a1206;box-shadow:var(--glow) rgba(232,162,58,.35)}
+  .cbtn.send:hover{filter:brightness(1.07)}
+  .cbtn.cancel{background:var(--panel2);color:var(--muted)}
+  .cbtn.cancel:hover{color:var(--ink)}
 </style>
 
 <div class="wrap">
@@ -256,8 +282,9 @@
 
   <div class="tabbar">
     <button class="tab active" data-tab="map">&#128506; The Map</button>
-    <button class="tab" data-tab="revenue">&#128176; Revenue</button>
+    <button class="tab" data-tab="revenue">&#129309; Sponsors</button>
     <button class="tab" data-tab="ops">&#128276; Alerts</button>
+        <button class="tab" data-tab="adminprev">&#128065; Admin Preview</button>
   </div>
 
   <div class="tabpanel active" id="tab-map">
@@ -309,35 +336,38 @@
   </div>
 
   <div class="tabpanel" id="tab-revenue">
-  <!-- Revenue opportunities -->
-    <h2 class="pitch-h">Revenue Opportunities</h2>
+  <!-- Sponsorship opportunities -->
+    <h2 class="pitch-h">Sponsorship Opportunities</h2>
+    <p class="rev-lead">The app is an official channel in every attendee’s pocket — live on the grounds, all weekend long. Here’s how partners and vendors plug in.</p>
     <div class="rev-grid">
+      <div class="rev-card flagship">
+        <span class="rev-tag">Flagship</span>
+        <span class="ri">🏆</span>
+        <div class="rt">Official App Sponsor</div>
+        <p class="rd">Title the whole experience — “The Official GOTJ App, presented by ___.” One partner, top billing on the splash screen and in every session, in front of the entire on-site audience.</p>
+      </div>
       <div class="rev-card">
-        <span class="ri">💰</span>
+        <span class="ri">📣</span>
+        <div class="rt">Sponsored Push Alert</div>
+        <p class="rd">Land on every fan’s phone in real time — “Late-night eats open now by the main stage.” A notification, not an ad they have to go looking for.</p>
+      </div>
+      <div class="rev-card">
+        <span class="ri">⭐</span>
         <div class="rt">Featured Vendor Listing</div>
-        <p class="rd">Vendors pay for logo placement, a full description, category tag, and priority map visibility.</p>
+        <p class="rd">Vendors upgrade to a full profile: logo, description, category tag, and priority placement in the in-app directory.</p>
       </div>
       <div class="rev-card">
         <span class="ri">📍</span>
         <div class="rt">Sponsored Map Pin</div>
-        <p class="rd">Food, merch, tattoo, drink, or service vendors pay to stand out with a branded pin on the interactive map.</p>
-      </div>
-      <div class="rev-card">
-        <span class="ri">📣</span>
-        <div class="rt">Push Alert Promotion</div>
-        <p class="rd">"Late-night food open now near the main stage." Sponsors pay to have their message pushed to every fan in the app.</p>
-      </div>
-      <div class="rev-card">
-        <span class="ri">🏆</span>
-        <div class="rt">Official App Sponsor</div>
-        <p class="rd">"Official GOTJ App presented by ______." A single sponsorship placement with maximum visibility to the entire audience.</p>
+        <p class="rd">A branded, stand-out pin on the interactive grounds map. Food, merch, tattoo, drinks, services — get found first.</p>
       </div>
       <div class="rev-card">
         <span class="ri">🛒</span>
         <div class="rt">Merch &amp; Ticket Links</div>
-        <p class="rd">Drive traffic to official tickets, upgrades, merch, RV and camping packages, and vendor applications — all in one tap.</p>
+        <p class="rd">One-tap links to official tickets, upgrades, merch, camping &amp; RV packages, and vendor applications — attention turned into clicks.</p>
       </div>
     </div>
+    <p class="rev-foot"><strong>Flexible packages</strong> — from a single featured vendor to the presenting partner. Built to scale with the Gathering.</p>
   </div>
 
   <div class="tabpanel" id="tab-ops">
@@ -363,12 +393,61 @@
     </div>
   </div>
 
+<div class="tabpanel" id="tab-adminprev">
+    <div class="admin-note">
+      <span class="lock">👁️</span>
+      <span><strong>Admin Preview</strong> — This is the staff-only Operations console. In the live app it lives on a separate, login-protected page; it is shown here so the team can preview it. Fans only see the read-only Alerts tab.</span>
+    </div>
+    <h2 class="pitch-h">Emergency &amp; Operations</h2>
+    <div class="alertbar" id="alertbarA">
+      <div class="alertbar-txt">
+        <strong id="alertStatusA">Alerts are off</strong>
+        <span id="alertSubA">Enable to broadcast alerts from this device.</span>
+      </div>
+      <button class="alert-enable" id="enableAlertsA">🔔 Enable Alerts</button>
+    </div>
+    <div class="ios-hint" id="iosHintA" hidden>
+      📲 On iPhone, add the app to your Home Screen first, then open it from there and tap Enable Alerts.
+    </div>
+    <div class="emer-grid">
+      <button class="emer-btn"><span class="ei">🏥</span><span class="el">Medical</span></button>
+      <button class="emer-btn"><span class="ei">🔒</span><span class="el">Security</span></button>
+      <button class="emer-btn"><span class="ei">🔍</span><span class="el">Lost &amp; Found</span></button>
+      <button class="emer-btn"><span class="ei">⛈️</span><span class="el">Weather Alert</span></button>
+      <button class="emer-btn"><span class="ei">🅿️</span><span class="el">Parking Update</span></button>
+      <button class="emer-btn"><span class="ei">🚧</span><span class="el">Road / Entry Update</span></button>
+      <button class="emer-btn"><span class="ei">⏰</span><span class="el">Schedule Delay</span></button>
+      <button class="emer-btn"><span class="ei">🧒</span><span class="el">Missing Person / Lost Child Alert</span></button>
+      <button class="emer-btn"><span class="ei">📢</span><span class="el">Emergency Broadcast</span></button>
+    </div>
+    <p class="emer-tagline">One official alert reaches every fan using the app.</p>
+    <h2 class="pitch-h" style="margin-top:10px">Vendor Alerts</h2>
+    <div class="emer-grid">
+      <button class="emer-btn vendor"><span class="ei">🛒</span><span class="el">Vendor Deal</span></button>
+      <button class="emer-btn vendor"><span class="ei">🍔</span><span class="el">Food &amp; Drink</span></button>
+      <button class="emer-btn vendor"><span class="ei">🎁</span><span class="el">Merch Drop</span></button>
+    </div>
+    <p class="emer-tagline vendor">Vendors &amp; sponsors can ping fans on the grounds in real time — a built-in paid channel.</p>
+  </div>
+
   <p class="footnote">Built by Kirk Creason · Private GOTJ 2026 companion app concept · Not for public release · Official branding and map use subject to GOTJ/Psychopathic written approval</p>
 </div>
 
 <div class="toast" id="toast"></div>
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet"></div>
+
+<div class="cscrim" id="cscrim"></div>
+<div class="cbox" id="cbox" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+  <h3 id="cTitle">Alert</h3>
+  <div class="clab">Message sent to fans</div>
+  <textarea id="cText" placeholder="Type the alert message…" maxlength="240"></textarea>
+  <div class="ccount"><span id="cCount">0</span>/240</div>
+  <div class="crow">
+    <button class="cbtn cancel" id="cCancel">Cancel</button>
+    <button class="cbtn send" id="cSend">📡 Send Alert</button>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -772,7 +851,7 @@
       if (isiOS && !isStandalone){ if (iosHint) iosHint.hidden = false; return; }
       if (!canNotify){ showToast('This browser does not support notifications.'); return; }
       Notification.requestPermission().then(function(p){
-        updateAlertUI();
+        updateAlertUI(); updateAdminUI();
         if (p === 'granted'){ showToast('🔔 Alerts enabled.'); }
         else if (p === 'denied'){ showToast('Alerts blocked — enable them in your browser settings.'); }
       });
@@ -780,6 +859,118 @@
   }
 
   updateAlertUI();
+
+  /* ----- Admin Preview: in-app preview of the staff-only sender (buttons live only in this tab) ----- */
+  var ALERTS = {
+    'Medical': { t:'🏥 Medical Alert', b:'Medical team dispatched. Nearest first-aid station is marked on the map.' },
+    'Security': { t:'🔒 Security Alert', b:'Security is responding. Please follow staff instructions.' },
+    'Lost & Found': { t:'🔍 Lost & Found', b:'Lost or found something? Lost & Found is at the Box Office.' },
+    'Weather Alert': { t:'⛈️ Weather Alert', b:'Severe weather incoming — seek shelter and wait for the all-clear.' },
+    'Parking Update': { t:'🅿️ Parking Update', b:'Parking & shuttle update. Open the app for the latest.' },
+    'Road / Entry Update': { t:'🚧 Road / Entry Update', b:'Entry and road conditions have changed. Allow extra time.' },
+    'Schedule Delay': { t:'⏰ Schedule Delay', b:'A set time has shifted. Open the schedule for the update.' },
+    'Missing Person / Lost Child Alert': { t:'🧒 Missing Person Alert', b:'Please help reunite — details in the app. Report sightings to nearest staff.' },
+    'Emergency Broadcast': { t:'📢 Emergency Broadcast', b:'Official emergency message. Follow all staff and posted signage.' },
+    'Vendor Deal': { t:'🛒 Vendor Deal', b:'A featured vendor is running a special right now — tap to see who.' },
+    'Food & Drink': { t:'🍔 Food & Drink', b:'Food & drink update — a vendor just opened or restocked on the grounds.' },
+    'Merch Drop': { t:'🎁 Merch Drop', b:'Limited merch drop happening now at the marketplace. First come, first served.' }
+  };
+  var barA = document.getElementById('alertbarA');
+  var statusA = document.getElementById('alertStatusA');
+  var subA = document.getElementById('alertSubA');
+  var enableA = document.getElementById('enableAlertsA');
+  var iosA = document.getElementById('iosHintA');
+
+  function updateAdminUI(){
+    if (!barA) return;
+    var granted = canNotify && Notification.permission === 'granted';
+    if (granted){
+      barA.classList.add('on');
+      statusA.textContent = 'Alerts are on';
+      subA.textContent = 'Tap any alert below to broadcast it.';
+      enableA.textContent = '✓ Enabled'; enableA.disabled = true;
+      if (iosA) iosA.hidden = true;
+    } else {
+      barA.classList.remove('on');
+      statusA.textContent = 'Alerts are off';
+      enableA.disabled = false; enableA.textContent = '🔔 Enable Alerts';
+      if (isiOS && !isStandalone){ subA.textContent = 'iPhone needs the app on your Home Screen first.'; if (iosA) iosA.hidden = false; }
+      else if (!canNotify){ subA.textContent = 'This browser does not support notifications.'; enableA.disabled = true; }
+      else { subA.textContent = 'Enable to broadcast alerts from this device.'; if (iosA) iosA.hidden = true; }
+    }
+  }
+
+  function fireAlert(title, body){
+    var opts = { body:body, tag:'gotj-ops', renotify:true, icon:'icon-192.png',
+                 badge:'icon-192.png', vibrate:[120,60,120], data:{ url:'./' } };
+    try {
+      if (swReg && swReg.showNotification){ swReg.showNotification(title, opts); }
+      else if (canNotify){ new Notification(title, opts); }
+    } catch(e){}
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller){
+        navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert:{ t:title, b:body } });
+      } else { addAlertToFeed({ t:title, b:body }); }
+    } catch(e){ addAlertToFeed({ t:title, b:body }); }
+    showToast('📡 Sent: ' + title);
+  }
+
+  /* ----- Compose: type a custom message for any alert before sending ----- */
+  var cscrim = document.getElementById('cscrim');
+  var cbox = document.getElementById('cbox');
+  var cTitle = document.getElementById('cTitle');
+  var cText = document.getElementById('cText');
+  var cCount = document.getElementById('cCount');
+  var cSend = document.getElementById('cSend');
+  var cCancel = document.getElementById('cCancel');
+  var composeTitle = '';
+
+  function openCompose(label){
+    var a = ALERTS[label] || { t:'📢 GOTJ 2026', b:'' };
+    composeTitle = a.t;
+    cTitle.textContent = a.t;
+    cText.value = a.b;
+    cCount.textContent = cText.value.length;
+    cscrim.classList.add('show'); cbox.classList.add('show');
+    setTimeout(function(){ cText.focus(); cText.select(); }, 60);
+  }
+  function closeCompose(){ cscrim.classList.remove('show'); cbox.classList.remove('show'); }
+
+  if (cText){ cText.addEventListener('input', function(){ cCount.textContent = cText.value.length; }); }
+  if (cCancel){ cCancel.addEventListener('click', closeCompose); }
+  if (cscrim){ cscrim.addEventListener('click', closeCompose); }
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeCompose(); });
+  if (cSend){
+    cSend.addEventListener('click', function(){
+      var body = cText.value.trim();
+      if (!body){ cText.focus(); showToast('Type a message first.'); return; }
+      fireAlert(composeTitle, body);
+      closeCompose();
+    });
+  }
+
+  if (enableA){
+    enableA.addEventListener('click', function(){
+      if (isiOS && !isStandalone){ if (iosA) iosA.hidden = false; return; }
+      if (!canNotify){ showToast('This browser does not support notifications.'); return; }
+      Notification.requestPermission().then(function(p){
+        updateAdminUI(); updateAlertUI();
+        if (p === 'granted'){ showToast('🔔 Alerts enabled.'); }
+        else if (p === 'denied'){ showToast('Alerts blocked — enable them in your browser settings.'); }
+      });
+    });
+  }
+
+  [].forEach.call(document.querySelectorAll('.emer-btn'), function(b){
+    b.addEventListener('click', function(){
+      var label = (b.querySelector('.el') || {}).textContent || 'Alert';
+      if (canNotify && Notification.permission === 'granted'){ openCompose(label); }
+      else if (isiOS && !isStandalone){ if (iosA) iosA.hidden = false; showToast('Add the app to your Home Screen first.'); }
+      else { showToast('Tap “Enable Alerts” first.'); }
+    });
+  });
+
+  updateAdminUI();
 
   load(function(){
     buildDays(); buildChips(); renderPins(); renderGuide();
@@ -877,6 +1068,12 @@
     });
     document.addEventListener('click',function(e){
       if(!e.target.closest('#searchbox')) sresults.classList.remove('open');
+    });
+
+    // Festival guide: tapping a schedule item or directory entry shows it on the map.
+    guideEl.addEventListener('click',function(e){
+      var item=e.target.closest('[data-id]');
+      if(item){ pickResult(item.getAttribute('data-id')); }
     });
   });
 })();
