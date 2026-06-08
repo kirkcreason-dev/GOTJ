@@ -68,6 +68,25 @@
     background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:999px;
     padding:11px 20px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .cscrim{position:fixed;inset:0;background:rgba(0,0,0,.62);opacity:0;pointer-events:none;transition:.2s;z-index:60}
+  .cscrim.show{opacity:1;pointer-events:auto}
+  .cbox{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);width:min(460px,92vw);
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;z-index:61;
+    opacity:0;pointer-events:none;transition:.2s;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .cbox.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+  .cbox h3{font-family:'Pirata One';color:var(--gold);font-size:23px;margin:0 0 3px;font-weight:400}
+  .cbox .clab{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:11px}
+  .cbox textarea{width:100%;min-height:96px;resize:vertical;background:var(--bg);color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;line-height:1.45}
+  .cbox textarea:focus{outline:none;border-color:var(--amber)}
+  .ccount{text-align:right;color:var(--muted);font-size:11px;margin-top:4px}
+  .crow{display:flex;gap:10px;margin-top:14px}
+  .cbtn{flex:1;font-family:'Oswald';font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    font-size:13px;border:0;border-radius:999px;padding:12px;cursor:pointer;transition:.15s}
+  .cbtn.send{background:var(--amber);color:#1a1206;box-shadow:var(--glow) rgba(232,162,58,.35)}
+  .cbtn.send:hover{filter:brightness(1.07)}
+  .cbtn.cancel{background:var(--panel2);color:var(--muted)}
+  .cbtn.cancel:hover{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -124,6 +143,18 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <div class="cscrim" id="cscrim"></div>
+  <div class="cbox" id="cbox" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+    <h3 id="cTitle">Alert</h3>
+    <div class="clab">Message sent to fans</div>
+    <textarea id="cText" placeholder="Type the alert message…" maxlength="240"></textarea>
+    <div class="ccount"><span id="cCount">0</span>/240</div>
+    <div class="crow">
+      <button class="cbtn cancel" id="cCancel">Cancel</button>
+      <button class="cbtn send" id="cSend">📡 Send Alert</button>
+    </div>
+  </div>
 
 <script>
 (function(){
@@ -193,21 +224,54 @@
     }
   }
 
-  function fireAlert(label){
-    var a = ALERTS[label] || { t:'📢 GOTJ 2026', b:label };
-    var opts = { body:a.b, tag:'gotj-ops', renotify:true, icon:'icon-192.png',
+  function fireAlert(title, body){
+    var opts = { body:body, tag:'gotj-ops', renotify:true, icon:'icon-192.png',
                  badge:'icon-192.png', vibrate:[120,60,120], data:{ url:'./' } };
     try {
-      if (swReg && swReg.showNotification){ swReg.showNotification(a.t, opts); }
-      else if (canNotify){ new Notification(a.t, opts); }
+      if (swReg && swReg.showNotification){ swReg.showNotification(title, opts); }
+      else if (canNotify){ new Notification(title, opts); }
     } catch(e){}
     // Relay to any open fan tabs so their feed updates live (same browser / Stage 2 push handles cross-device).
     try {
       if (navigator.serviceWorker && navigator.serviceWorker.controller){
-        navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert:{ t:a.t, b:a.b } });
+        navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert:{ t:title, b:body } });
       }
     } catch(e){}
-    showToast('📡 Sent: ' + a.t);
+    showToast('📡 Sent: ' + title);
+  }
+
+  /* ----- Compose: type a custom message for any alert before sending ----- */
+  var cscrim = document.getElementById('cscrim');
+  var cbox = document.getElementById('cbox');
+  var cTitle = document.getElementById('cTitle');
+  var cText = document.getElementById('cText');
+  var cCount = document.getElementById('cCount');
+  var cSend = document.getElementById('cSend');
+  var cCancel = document.getElementById('cCancel');
+  var composeTitle = '';
+
+  function openCompose(label){
+    var a = ALERTS[label] || { t:'📢 GOTJ 2026', b:'' };
+    composeTitle = a.t;
+    cTitle.textContent = a.t;
+    cText.value = a.b;                 // prefilled default — edit or replace
+    cCount.textContent = cText.value.length;
+    cscrim.classList.add('show'); cbox.classList.add('show');
+    setTimeout(function(){ cText.focus(); cText.select(); }, 60);
+  }
+  function closeCompose(){ cscrim.classList.remove('show'); cbox.classList.remove('show'); }
+
+  if (cText){ cText.addEventListener('input', function(){ cCount.textContent = cText.value.length; }); }
+  if (cCancel){ cCancel.addEventListener('click', closeCompose); }
+  if (cscrim){ cscrim.addEventListener('click', closeCompose); }
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeCompose(); });
+  if (cSend){
+    cSend.addEventListener('click', function(){
+      var body = cText.value.trim();
+      if (!body){ cText.focus(); showToast('Type a message first.'); return; }
+      fireAlert(composeTitle, body);
+      closeCompose();
+    });
   }
 
   if (enableBtn){
@@ -226,7 +290,7 @@
     b.addEventListener('click', function(){
       var label = (b.querySelector('.el') || {}).textContent || 'Alert';
       if (canNotify && Notification.permission === 'granted'){
-        fireAlert(label);
+        openCompose(label);
       } else if (isiOS && !isStandalone){
         if (iosHint) iosHint.hidden = false;
         showToast('Add this console to your Home Screen first.');
