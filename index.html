@@ -72,9 +72,17 @@
   .zoom.grabbing{cursor:grabbing}
   .zoom img.map{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none;pointer-events:none}
   .pinlayer{position:absolute;inset:0;line-height:1}
-  .pin{position:absolute;transform:translate(-50%,-100%) scale(var(--inv,1));transform-origin:50% 100%;cursor:pointer;border:0;background:transparent;padding:0;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
+  .pin{position:absolute;transform:translate(-50%,-100%) scale(var(--inv,1));transform-origin:50% 100%;cursor:pointer;border:0;background:transparent;padding:0;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7));z-index:4}
+  .pin::before{content:"";position:absolute;left:50%;top:-12px;transform:translateX(-50%);width:54px;height:54px;border-radius:50%}
+  .pin:active{z-index:7}
+  .editbar{position:fixed;left:0;right:0;bottom:0;background:var(--violet);color:#1a1206;
+    font-family:'Oswald';font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.05em;
+    padding:10px 14px;text-align:center;z-index:80;box-shadow:0 -6px 20px rgba(0,0,0,.4)}
+  .editbar button{margin-left:10px;background:#1a1206;color:var(--gold);border:0;border-radius:999px;padding:6px 13px;font:inherit;cursor:pointer}
+  .editta{position:fixed;left:10px;right:10px;bottom:50px;height:130px;display:none;z-index:80;
+    background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px;font-size:11px;font-family:monospace;line-height:1.4}
   .pin:hover,.pin.sel{transform:translate(-50%,-100%) scale(calc(var(--inv,1)*1.2));z-index:6}
-  .pin .head{width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.5)}
+  .pin .head{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.5)}
   .pin.sel .head{box-shadow:0 0 0 1.5px #000, var(--glow) #fff}
   .pin .head span{transform:rotate(45deg);font-size:13px;line-height:1}
   .pin .label{font-family:'Oswald';font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.03em;margin-top:3px;white-space:nowrap;background:rgba(12,8,5,.9);padding:2px 6px;border-radius:4px;color:var(--ink);max-width:130px;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .12s;border:1px solid var(--line)}
@@ -633,17 +641,37 @@
     return p.ev.some(function(e){ return e.d===dayNum(); });
   }
 
+  var EDIT = /(?:[?&#])edit/i.test(location.search + location.hash);
+  function startPinDrag(p, btn){
+    return function(ev){
+      ev.preventDefault(); ev.stopPropagation();
+      var rect = stageWrap.getBoundingClientRect();
+      var W0 = pinlayer.offsetWidth, H0 = pinlayer.offsetHeight;
+      btn.setPointerCapture && btn.setPointerCapture(ev.pointerId);
+      function move(e){
+        var fx = (e.clientX - rect.left - ZM.tx) / (ZM.z * W0);
+        var fy = (e.clientY - rect.top  - ZM.ty) / (ZM.z * H0);
+        p.x = Math.max(0, Math.min(100, +(fx*100).toFixed(1)));
+        p.y = Math.max(0, Math.min(100, +(fy*100).toFixed(1)));
+        btn.style.left = p.x + '%'; btn.style.top = p.y + '%';
+      }
+      function up(){ document.removeEventListener('pointermove',move); document.removeEventListener('pointerup',up); }
+      document.addEventListener('pointermove',move);
+      document.addEventListener('pointerup',up);
+    };
+  }
   function renderPins(){
     pinlayer.innerHTML="";
     pins.forEach(function(p){
       if(state.isolate){ if(p.id!==state.isolate) return; }
-      else { if(state.hidden[p.cat]) return; if(!pinVisibleByDay(p)) return; }
+      else if(!EDIT){ if(state.hidden[p.cat]) return; if(!pinVisibleByDay(p)) return; }
       var c=CATS[p.cat];
       var btn=document.createElement("button");
       btn.className="pin"+(state.selId===p.id?" sel":"");
       btn.style.left=p.x+"%"; btn.style.top=p.y+"%";
       btn.innerHTML='<span class="head" style="background:'+c.color+'"><span>'+c.icon+'</span></span><span class="label">'+esc(p.name)+'</span>';
-      btn.onclick=function(ev){ ev.stopPropagation(); if(ZM.dragged) return; openDetail(p.id); };
+      if(EDIT){ btn.style.cursor='move'; btn.addEventListener('pointerdown', startPinDrag(p, btn)); }
+      else { btn.onclick=function(ev){ ev.stopPropagation(); if(ZM.z>1 && ZM.dragged) return; openDetail(p.id); }; }
       pinlayer.appendChild(btn);
     });
   }
@@ -694,7 +722,7 @@
 
   function openDetail(id){
     var p=pins.find(function(x){return x.id===id;}); if(!p) return;
-    state.selId=id; renderPins();
+    state.selId=id; state.isolate=id; renderPins();
     var c=CATS[p.cat];
     var evs=(p.ev||[]).slice().sort(function(a,b){ if(a.d!==b.d)return a.d-b.d; return parseTime(a.t)-parseTime(b.t); });
     var evHtml=evs.length?'<ul class="evlist">'+evs.map(function(e){
@@ -769,7 +797,7 @@
       var pi=pinchInfo(); var r=stageWrap.getBoundingClientRect();
       zoomAt(pi.cx-r.left, pi.cy-r.top, pi.dist/pinchPrev.dist); pinchPrev=pi; ZM.dragged=true; return;
     }
-    if(downAt && (Math.abs(e.clientX-downAt.x)>4||Math.abs(e.clientY-downAt.y)>4)) ZM.dragged=true;
+    if(downAt && (Math.abs(e.clientX-downAt.x)>11||Math.abs(e.clientY-downAt.y)>11)) ZM.dragged=true;
     if(ZM.z>1 && ZM.dragged){
       if(!dragging){ dragging=true; zoomEl.classList.add('grabbing'); try{stageWrap.setPointerCapture(e.pointerId);}catch(_){} }
       ZM.tx+=e.clientX-prev.x; ZM.ty+=e.clientY-prev.y; clampPan(); applyZ();
@@ -1007,7 +1035,19 @@
   updateAdminUI();
 
   load(function(){
-    buildDays(); buildChips(); renderPins(); renderGuide();
+    buildDays(); buildChips(); renderPins();
+
+    if(EDIT){
+      var ebar=document.createElement('div'); ebar.className='editbar';
+      ebar.innerHTML='\uD83D\uDD27 EDIT MODE \u2014 drag any pin to its spot <button id="expPins">\uD83D\uDCCB Copy coordinates</button>';
+      document.body.appendChild(ebar);
+      var eta=document.createElement('textarea'); eta.className='editta'; eta.readOnly=true; document.body.appendChild(eta);
+      document.getElementById('expPins').addEventListener('click', function(){
+        var out=pins.map(function(p){ return '{id:"'+p.id+'", x:'+p.x+', y:'+p.y+'}'; }).join(',\n');
+        eta.value=out; eta.style.display='block'; eta.select();
+        try{ navigator.clipboard.writeText(out); showToast('Coordinates copied'); }catch(e){ showToast('Select the box and copy'); }
+      });
+    } renderGuide();
 
     // ---- search ----
     var sinput=document.getElementById('searchInput');
@@ -1070,7 +1110,6 @@
       sresults.classList.remove('open');
       sinput.value=''; sclear.classList.remove('vis'); activeIdx=-1;
       var p=pins.find(function(x){return x.id===id;}); if(!p) return;
-      state.isolate = isolate ? id : null;
       // switch to map tab if not already there
       [].forEach.call(document.querySelectorAll('.tab'),function(b){ b.classList.remove('active'); });
       [].forEach.call(document.querySelectorAll('.tabpanel'),function(p){ p.classList.remove('active'); });
