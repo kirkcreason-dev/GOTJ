@@ -264,6 +264,18 @@
   .cbtn.send:hover{filter:brightness(1.07)}
   .cbtn.cancel{background:var(--panel2);color:var(--muted)}
   .cbtn.cancel:hover{color:var(--ink)}
+  .pushprev{position:fixed;left:50%;top:14px;transform:translate(-50%,-150%);width:min(420px,94vw);
+    background:rgba(28,21,13,.97);border:1px solid var(--line);border-radius:16px;padding:12px 14px;
+    display:flex;gap:11px;align-items:flex-start;z-index:70;box-shadow:0 14px 40px rgba(0,0,0,.55);
+    opacity:0;transition:transform .3s,opacity .3s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .pushprev.show{transform:translate(-50%,0);opacity:1}
+  .pushprev img{width:38px;height:38px;border-radius:9px;flex-shrink:0}
+  .pushprev .pp-b{min-width:0;flex:1}
+  .pushprev .pp-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .pushprev .pp-app{font-family:'Oswald';font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:10px;color:var(--muted)}
+  .pushprev .pp-now{font-size:10px;color:var(--muted)}
+  .pushprev .pp-title{font-weight:700;font-size:14px;color:var(--ink);margin:2px 0 1px}
+  .pushprev .pp-body{font-size:13px;color:var(--muted);line-height:1.4}
 </style>
 
 <div class="wrap">
@@ -437,6 +449,14 @@
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet"></div>
 
+<div class="pushprev" id="pushPrev">
+  <img src="icon-192.png" alt="">
+  <div class="pp-b">
+    <div class="pp-top"><span class="pp-app">GOTJ 2026</span><span class="pp-now">now</span></div>
+    <div class="pp-title" id="ppTitle"></div>
+    <div class="pp-body" id="ppBody"></div>
+  </div>
+</div>
 <div class="cscrim" id="cscrim"></div>
 <div class="cbox" id="cbox" role="dialog" aria-modal="true" aria-labelledby="cTitle">
   <h3 id="cTitle">Alert</h3>
@@ -808,7 +828,9 @@
   var feed = document.getElementById('alertFeed');
   var feedEmpty = document.getElementById('feedEmpty');
 
+  var _seenAlerts = {};
   function addAlertToFeed(a){
+    if (a && a.id){ if (_seenAlerts[a.id]) return; _seenAlerts[a.id] = 1; }
     if (feedEmpty) feedEmpty.style.display = 'none';
     var card = document.createElement('div'); card.className = 'alert-card';
     var t = document.createElement('div'); t.className = 'ac-title'; t.textContent = a.t || 'GOTJ Alert';
@@ -884,23 +906,37 @@
   function updateAdminUI(){
     if (!barA) return;
     var granted = canNotify && Notification.permission === 'granted';
+    if (iosA) iosA.hidden = true;
     if (granted){
       barA.classList.add('on');
-      statusA.textContent = 'Alerts are on';
-      subA.textContent = 'Tap any alert below to broadcast it.';
+      statusA.textContent = 'Alerts on';
+      subA.textContent = 'Sends also fire a real notification on this device.';
       enableA.textContent = '✓ Enabled'; enableA.disabled = true;
-      if (iosA) iosA.hidden = true;
     } else {
       barA.classList.remove('on');
-      statusA.textContent = 'Alerts are off';
-      enableA.disabled = false; enableA.textContent = '🔔 Enable Alerts';
-      if (isiOS && !isStandalone){ subA.textContent = 'iPhone needs the app on your Home Screen first.'; if (iosA) iosA.hidden = false; }
-      else if (!canNotify){ subA.textContent = 'This browser does not support notifications.'; enableA.disabled = true; }
-      else { subA.textContent = 'Enable to broadcast alerts from this device.'; if (iosA) iosA.hidden = true; }
+      statusA.textContent = 'Live demo';
+      enableA.disabled = false; enableA.textContent = '🔔 Enable Device Alerts';
+      subA.textContent = 'Tap any alert to try it — works right here. Enable for a real device notification too.';
+      if (!canNotify){ enableA.disabled = true; enableA.textContent = '🔔 Alerts'; }
     }
   }
 
+  var pushPrev = document.getElementById('pushPrev');
+  var ppTitle = document.getElementById('ppTitle');
+  var ppBody = document.getElementById('ppBody');
+  var ppTimer = null;
+  function showPushPreview(title, body){
+    if (!pushPrev) return;
+    ppTitle.textContent = title; ppBody.textContent = body;
+    pushPrev.classList.add('show');
+    clearTimeout(ppTimer); ppTimer = setTimeout(function(){ pushPrev.classList.remove('show'); }, 4500);
+  }
+  if (pushPrev){ pushPrev.addEventListener('click', function(){ pushPrev.classList.remove('show'); }); }
+
   function fireAlert(title, body){
+    showPushPreview(title, body);   // in-app banner so the demo works in any browser, no install
+    var alert = { t:title, b:body, id: Date.now() + '-' + Math.random().toString(36).slice(2,7) };
+    addAlertToFeed(alert);          // populate this app's Alerts feed immediately
     var opts = { body:body, tag:'gotj-ops', renotify:true, icon:'icon-192.png',
                  badge:'icon-192.png', vibrate:[120,60,120], data:{ url:'./' } };
     try {
@@ -909,9 +945,9 @@
     } catch(e){}
     try {
       if (navigator.serviceWorker && navigator.serviceWorker.controller){
-        navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert:{ t:title, b:body } });
-      } else { addAlertToFeed({ t:title, b:body }); }
-    } catch(e){ addAlertToFeed({ t:title, b:body }); }
+        navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert: alert });  // update other open tabs
+      }
+    } catch(e){}
     showToast('📡 Sent: ' + title);
   }
 
@@ -964,9 +1000,7 @@
   [].forEach.call(document.querySelectorAll('.emer-btn'), function(b){
     b.addEventListener('click', function(){
       var label = (b.querySelector('.el') || {}).textContent || 'Alert';
-      if (canNotify && Notification.permission === 'granted'){ openCompose(label); }
-      else if (isiOS && !isStandalone){ if (iosA) iosA.hidden = false; showToast('Add the app to your Home Screen first.'); }
-      else { showToast('Tap “Enable Alerts” first.'); }
+      openCompose(label);   // demo: always works, no enable / Home Screen required
     });
   });
 
