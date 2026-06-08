@@ -596,7 +596,7 @@
   }
   function save(){ if(hasStore){ try{ window.storage.set(KEY, JSON.stringify(pins)); }catch(e){} } }
 
-  var state = { day:"all", hidden:{}, placing:false, selId:null };
+  var state = { day:"all", hidden:{}, placing:false, selId:null, isolate:null };
 
   var $ = function(s){ return document.querySelector(s); };
   var pinlayer=$("#pinlayer"), stageWrap=$("#stageWrap"), guideEl=$("#guide"),
@@ -610,7 +610,7 @@
       var b=document.createElement("button");
       b.className="day-btn"+(state.day===d.v?" active":"");
       b.textContent=d.l;
-      b.onclick=function(){ state.day=d.v; buildDays(); renderPins(); renderGuide(); };
+      b.onclick=function(){ state.day=d.v; state.isolate=null; buildDays(); renderPins(); renderGuide(); };
       daysEl.appendChild(b);
     });
   }
@@ -621,7 +621,7 @@
       var el=document.createElement("button");
       el.className="chip"+(state.hidden[k]?" off":"");
       el.innerHTML='<span class="dot" style="background:'+c.color+';box-shadow:var(--glow) '+c.color+'"></span>'+c.label;
-      el.onclick=function(){ state.hidden[k]=!state.hidden[k]; buildChips(); renderPins(); renderGuide(); };
+      el.onclick=function(){ state.hidden[k]=!state.hidden[k]; state.isolate=null; buildChips(); renderPins(); renderGuide(); };
       chipsEl.appendChild(el);
     });
   }
@@ -636,8 +636,8 @@
   function renderPins(){
     pinlayer.innerHTML="";
     pins.forEach(function(p){
-      if(state.hidden[p.cat]) return;
-      if(!pinVisibleByDay(p)) return;
+      if(state.isolate){ if(p.id!==state.isolate) return; }
+      else { if(state.hidden[p.cat]) return; if(!pinVisibleByDay(p)) return; }
       var c=CATS[p.cat];
       var btn=document.createElement("button");
       btn.className="pin"+(state.selId===p.id?" sel":"");
@@ -715,7 +715,7 @@
   }
 
   function showSheet(){ scrim.classList.add("show"); sheet.classList.add("show"); }
-  function closeSheet(){ scrim.classList.remove("show"); sheet.classList.remove("show"); state.selId=null; renderPins(); }
+  function closeSheet(){ scrim.classList.remove("show"); sheet.classList.remove("show"); state.selId=null; state.isolate=null; renderPins(); }
   scrim.onclick=closeSheet;
 
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -1066,10 +1066,11 @@
       sresults.classList.add('open');
     }
 
-    function pickResult(id){
+    function pickResult(id, isolate){
       sresults.classList.remove('open');
       sinput.value=''; sclear.classList.remove('vis'); activeIdx=-1;
       var p=pins.find(function(x){return x.id===id;}); if(!p) return;
+      state.isolate = isolate ? id : null;
       // switch to map tab if not already there
       [].forEach.call(document.querySelectorAll('.tab'),function(b){ b.classList.remove('active'); });
       [].forEach.call(document.querySelectorAll('.tabpanel'),function(p){ p.classList.remove('active'); });
@@ -1107,7 +1108,7 @@
     // Festival guide: tapping a schedule item or directory entry shows it on the map.
     guideEl.addEventListener('click',function(e){
       var item=e.target.closest('[data-id]');
-      if(item){ pickResult(item.getAttribute('data-id')); }
+      if(item){ pickResult(item.getAttribute('data-id'), true); }
     });
   });
 })();
