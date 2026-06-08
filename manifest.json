@@ -1,0 +1,16 @@
+{
+  "name": "GOTJ 2026 Companion",
+  "short_name": "GOTJ 2026",
+  "description": "Interactive grounds map, schedule, vendors and official alerts for the Gathering of the Juggalos 2026.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c0805",
+  "theme_color": "#0c0805",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

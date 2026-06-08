@@ -2,6 +2,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>GOTJ 2026 · Macks Creek, MO</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0c0805">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GOTJ 2026">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Special+Elite&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
@@ -189,6 +195,35 @@
   .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
   .tabpanel{display:none;padding-top:4px}
   .tabpanel.active{display:block}
+  /* --- push / alerts UI --- */
+  .alertbar{display:flex;align-items:center;gap:14px;justify-content:space-between;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;margin:4px 0 16px}
+  .alertbar-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .alertbar-txt strong{font-family:'Oswald';font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--ink);font-size:14px}
+  .alertbar-txt span{color:var(--muted);font-size:12.5px;line-height:1.35}
+  .alert-enable{flex-shrink:0;font-family:'Oswald';font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em;font-size:13px;color:#1a1206;background:var(--amber);
+    border:0;border-radius:999px;padding:11px 18px;cursor:pointer;transition:.15s;
+    box-shadow:var(--glow) rgba(232,162,58,.35)}
+  .alert-enable:hover{filter:brightness(1.07)}
+  .alert-enable:disabled{background:var(--panel2);color:var(--muted);
+    box-shadow:none;cursor:default}
+  .alertbar.on{border-color:var(--acid)}
+  .alertbar.on .alertbar-txt strong{color:var(--acid)}
+  .ios-hint{background:rgba(232,162,58,.08);border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;margin:0 0 16px;color:var(--ink);
+    font-size:13px;line-height:1.5}
+  .ios-hint strong{color:var(--gold)}
+  .emer-btn.vendor{border-color:rgba(232,162,58,.45)}
+  .emer-tagline.vendor{color:var(--amber)}
+  .admin-note{display:flex;align-items:center;gap:10px;background:rgba(176,107,221,.10);
+    border:1px solid rgba(176,107,221,.45);border-radius:12px;padding:12px 14px;
+    margin:0 0 18px;color:var(--ink);font-size:13px;line-height:1.45}
+  .admin-note .lock{font-size:18px;flex-shrink:0}
+  .admin-note strong{color:var(--violet);font-family:'Oswald';font-weight:700;
+    text-transform:uppercase;letter-spacing:.05em}
 </style>
 
 <div class="wrap">
@@ -293,7 +328,22 @@
 
   <div class="tabpanel" id="tab-ops">
   <!-- Emergency + Operations -->
+    <div class="admin-note">
+      <span class="lock">🔒</span>
+      <span><strong>Admin Only</strong> — In the live app this Operations console is restricted to GOTJ staff and admins. Fans never see this tab or these alert controls.</span>
+    </div>
     <h2 class="pitch-h">Emergency &amp; Operations</h2>
+    <div class="alertbar" id="alertbar">
+      <div class="alertbar-txt">
+        <strong id="alertStatus">Alerts are off</strong>
+        <span id="alertSub">Turn on to get official GOTJ alerts on this device.</span>
+      </div>
+      <button class="alert-enable" id="enableAlerts">🔔 Enable Alerts</button>
+    </div>
+    <div class="ios-hint" id="iosHint" hidden>
+      📲 To get alerts on iPhone, tap the <strong>Share</strong> icon below, then
+      <strong>“Add to Home Screen.”</strong> Open the app from your Home Screen and tap Enable Alerts.
+    </div>
     <div class="emer-grid">
       <button class="emer-btn"><span class="ei">🏥</span><span class="el">Medical</span></button>
       <button class="emer-btn"><span class="ei">🔒</span><span class="el">Security</span></button>
@@ -306,6 +356,13 @@
       <button class="emer-btn"><span class="ei">📢</span><span class="el">Emergency Broadcast</span></button>
     </div>
     <p class="emer-tagline">One official alert can reach every fan using the app.</p>
+    <h2 class="pitch-h" style="margin-top:10px">Vendor Alerts</h2>
+    <div class="emer-grid">
+      <button class="emer-btn vendor"><span class="ei">🛒</span><span class="el">Vendor Deal</span></button>
+      <button class="emer-btn vendor"><span class="ei">🍔</span><span class="el">Food &amp; Drink</span></button>
+      <button class="emer-btn vendor"><span class="ei">🎁</span><span class="el">Merch Drop</span></button>
+    </div>
+    <p class="emer-tagline vendor">Vendors &amp; sponsors can ping fans on the grounds in real time — a built-in paid channel.</p>
   </div>
 
   <p class="footnote">Built by Kirk Creason · Private GOTJ 2026 companion app concept · Not for public release · Official branding and map use subject to GOTJ/Psychopathic written approval</p>
@@ -649,11 +706,110 @@
     toastEl.textContent=msg; toastEl.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(function(){toastEl.classList.remove('show');},3400);
   }
-  [].forEach.call(document.querySelectorAll('.emer-btn'),function(b){
-    b.addEventListener('click',function(){
-      showToast('📡 Demo mode \u2014 in production, this alert reaches every fan on the app instantly.');
+  /* ============ ALERTS / PUSH ============ */
+  var swReg = null;
+  var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                     || window.navigator.standalone === true;
+  var isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var canNotify = ('Notification' in window);
+
+  // Register the service worker (required for push + offline + install).
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js', { scope: './' })
+      .then(function(reg){ swReg = reg; })
+      .catch(function(){ /* ignore: still works as a normal site */ });
+  }
+
+  // One template per Operations alert type.
+  var ALERTS = {
+    'Medical': { t:'🏥 Medical Alert', b:'Medical team dispatched. Nearest first-aid station is marked on the map.' },
+    'Security': { t:'🔒 Security Alert', b:'Security is responding. Please follow staff instructions.' },
+    'Lost & Found': { t:'🔍 Lost & Found', b:'Lost or found something? Lost & Found is at the Box Office.' },
+    'Weather Alert': { t:'⛈️ Weather Alert', b:'Severe weather incoming — seek shelter and wait for the all-clear.' },
+    'Parking Update': { t:'🅿️ Parking Update', b:'Parking & shuttle update. Open the app for the latest.' },
+    'Road / Entry Update': { t:'🚧 Road / Entry Update', b:'Entry and road conditions have changed. Allow extra time.' },
+    'Schedule Delay': { t:'⏰ Schedule Delay', b:'A set time has shifted. Open the schedule for the update.' },
+    'Missing Person / Lost Child Alert': { t:'🧒 Missing Person Alert', b:'Please help reunite — details in the app. Report sightings to nearest staff.' },
+    'Emergency Broadcast': { t:'📢 Emergency Broadcast', b:'Official emergency message. Follow all staff and posted signage.' },
+    'Vendor Deal': { t:'🛒 Vendor Deal', b:'A featured vendor is running a special right now — tap to see who.' },
+    'Food & Drink': { t:'🍔 Food & Drink', b:'Food & drink update — a vendor just opened or restocked on the grounds.' },
+    'Merch Drop': { t:'🎁 Merch Drop', b:'Limited merch drop happening now at the marketplace. First come, first served.' }
+  };
+
+  var bar = document.getElementById('alertbar');
+  var statusEl = document.getElementById('alertStatus');
+  var subEl = document.getElementById('alertSub');
+  var enableBtn = document.getElementById('enableAlerts');
+  var iosHint = document.getElementById('iosHint');
+
+  function updateAlertUI(){
+    var granted = canNotify && Notification.permission === 'granted';
+    if (granted){
+      bar.classList.add('on');
+      statusEl.textContent = 'Alerts are on';
+      subEl.textContent = 'Tap any alert below to send it to this device.';
+      enableBtn.textContent = '✓ Enabled';
+      enableBtn.disabled = true;
+      if (iosHint) iosHint.hidden = true;
+    } else {
+      bar.classList.remove('on');
+      statusEl.textContent = 'Alerts are off';
+      enableBtn.disabled = false;
+      enableBtn.textContent = '🔔 Enable Alerts';
+      // iPhone in a Safari tab can't do web push — must install to Home Screen first.
+      if (isiOS && !isStandalone){
+        subEl.textContent = 'iPhone needs the app on your Home Screen first.';
+        if (iosHint) iosHint.hidden = false;
+      } else if (!canNotify){
+        subEl.textContent = 'This browser does not support push notifications.';
+        enableBtn.disabled = true;
+      } else {
+        subEl.textContent = 'Turn on to get official GOTJ alerts on this device.';
+        if (iosHint) iosHint.hidden = true;
+      }
+    }
+  }
+
+  function fireAlert(label){
+    var a = ALERTS[label] || { t:'📢 GOTJ 2026', b:label };
+    var opts = { body:a.b, tag:'gotj-ops', renotify:true, icon:'icon-192.png',
+                 badge:'icon-192.png', vibrate:[120,60,120], data:{ url:'./' } };
+    try {
+      if (swReg && swReg.showNotification){ swReg.showNotification(a.t, opts); }
+      else { new Notification(a.t, opts); }
+      showToast('📡 Sent: ' + a.t);
+    } catch(e){
+      showToast('📡 ' + a.t + ' — ' + a.b);
+    }
+  }
+
+  if (enableBtn){
+    enableBtn.addEventListener('click', function(){
+      if (isiOS && !isStandalone){ if (iosHint) iosHint.hidden = false; return; }
+      if (!canNotify){ showToast('This browser does not support notifications.'); return; }
+      Notification.requestPermission().then(function(p){
+        updateAlertUI();
+        if (p === 'granted'){ showToast('🔔 Alerts enabled on this device.'); }
+        else if (p === 'denied'){ showToast('Alerts blocked — enable them in your browser settings.'); }
+      });
+    });
+  }
+
+  [].forEach.call(document.querySelectorAll('.emer-btn'), function(b){
+    b.addEventListener('click', function(){
+      var label = (b.querySelector('.el') || {}).textContent || 'Alert';
+      if (canNotify && Notification.permission === 'granted'){
+        fireAlert(label);
+      } else if (isiOS && !isStandalone){
+        if (iosHint) iosHint.hidden = false;
+        showToast('Add the app to your Home Screen to receive alerts.');
+      } else {
+        showToast('Tap “Enable Alerts” first to turn on notifications.');
+      }
     });
   });
+
+  updateAlertUI();
 
   load(function(){
     buildDays(); buildChips(); renderPins(); renderGuide();
