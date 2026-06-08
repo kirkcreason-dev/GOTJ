@@ -45,15 +45,32 @@ self.addEventListener('push', (e) => {
   let data = { title: 'GOTJ 2026', body: 'New alert from the Gathering.', tag: 'gotj', url: './' };
   try { if (e.data) data = Object.assign(data, e.data.json()); } catch (_) {}
   e.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      tag: data.tag || 'gotj',
-      icon: './icon-192.png',
-      badge: './icon-192.png',
-      data: { url: data.url || './' },
-      vibrate: [120, 60, 120]
-    })
+    Promise.all([
+      self.registration.showNotification(data.title, {
+        body: data.body,
+        tag: data.tag || 'gotj',
+        icon: './icon-192.png',
+        badge: './icon-192.png',
+        data: { url: data.url || './' },
+        vibrate: [120, 60, 120]
+      }),
+      broadcast({ t: data.title, b: data.body })
+    ])
   );
+});
+
+/* Relay an alert to every open app tab so the user-facing feed updates live.
+   The admin console posts {type:'relay-alert', alert} here; incoming push
+   broadcasts directly. Cross-device delivery still requires the push backend. */
+function broadcast(alert) {
+  return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+    wins.forEach((w) => w.postMessage({ type: 'gotj-alert', alert: alert }));
+  });
+}
+
+self.addEventListener('message', (e) => {
+  const d = e.data || {};
+  if (d.type === 'relay-alert' && d.alert) { broadcast(d.alert); }
 });
 
 /* Tapping a notification focuses the open app or opens it. */
