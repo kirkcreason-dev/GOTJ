@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GOTJ Ops">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
@@ -255,11 +258,18 @@
       else if (canNotify){ new Notification(title, opts); }
     } catch(e){}
     // Relay to any open fan tabs so their feed updates live (same browser / Stage 2 push handles cross-device).
-    try {
-      if (navigator.serviceWorker && navigator.serviceWorker.controller){
-        navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert:{ t:title, b:body } });
-      }
-    } catch(e){}
+    if (window.GOTJ_DB){
+      try {
+        window.GOTJ_DB.collection('alerts').add({ t:title, b:body, tsMs: Date.now(),
+          ts: firebase.firestore.FieldValue.serverTimestamp() });   // syncs to every device
+      } catch(e){ console.warn('cloud send failed', e); }
+    } else {
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.controller){
+          navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert:{ t:title, b:body } });
+        }
+      } catch(e){}
+    }
     showToast('📡 Sent: ' + title);
   }
 

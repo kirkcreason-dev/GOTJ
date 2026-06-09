@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GOTJ 2026">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Special+Elite&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
@@ -840,7 +843,7 @@
       .catch(function(){});
     // Live feed: when an alert is broadcast, the service worker relays it here.
     navigator.serviceWorker.addEventListener('message', function(e){
-      if (e.data && e.data.type === 'gotj-alert' && e.data.alert) addAlertToFeed(e.data.alert);
+      if (!window.GOTJ_DB && e.data && e.data.type === 'gotj-alert' && e.data.alert) addAlertToFeed(e.data.alert);
     });
   }
 
@@ -882,6 +885,33 @@
       renderAlertCard(feedAlerts[i]);
     }
   })();
+
+  /* ---- Cross-device sync via Firestore (active once firebase-config.js is set) ---- */
+  function renderCloudFeed(docs){     // docs newest-first
+    [].slice.call(feed.querySelectorAll('.alert-card')).forEach(function(c){ c.remove(); });
+    _seenAlerts = {}; feedAlerts = docs.slice();
+    docs.forEach(function(d){ if (d.id) _seenAlerts[d.id] = 1; });
+    for (var i = docs.length - 1; i >= 0; i--) renderAlertCard(docs[i]);   // newest ends on top
+    if (feedEmpty) feedEmpty.style.display = docs.length ? 'none' : '';
+    saveAlertStore();
+  }
+  function sendAlertToCloud(t, b){
+    if (!window.GOTJ_DB) return false;
+    try {
+      window.GOTJ_DB.collection('alerts').add({ t:t, b:b, tsMs: Date.now(),
+        ts: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch(e){ console.warn('cloud send failed', e); }
+    return true;
+  }
+  if (window.GOTJ_DB){
+    try {
+      window.GOTJ_DB.collection('alerts').orderBy('tsMs','desc').limit(300).onSnapshot(function(snap){
+        var docs = [];
+        snap.forEach(function(doc){ var x = doc.data() || {}; docs.push({ id:doc.id, t:x.t||'GOTJ Alert', b:x.b||'', ts:x.tsMs||Date.now() }); });
+        renderCloudFeed(docs);
+      }, function(err){ console.warn('alerts listener error', err); });
+    } catch(e){ console.warn('subscribe failed', e); }
+  }
 
   function updateAlertUI(){
     var granted = canNotify && Notification.permission === 'granted';
@@ -977,19 +1007,23 @@
 
   function fireAlert(title, body){
     showPushPreview(title, body);   // in-app banner so the demo works in any browser, no install
-    var alert = { t:title, b:body, id: Date.now() + '-' + Math.random().toString(36).slice(2,7) };
-    addAlertToFeed(alert);          // populate this app's Alerts feed immediately
     var opts = { body:body, tag:'gotj-ops', renotify:true, icon:'icon-192.png',
                  badge:'icon-192.png', vibrate:[120,60,120], data:{ url:'./' } };
     try {
       if (swReg && swReg.showNotification){ swReg.showNotification(title, opts); }
       else if (canNotify){ new Notification(title, opts); }
     } catch(e){}
-    try {
-      if (navigator.serviceWorker && navigator.serviceWorker.controller){
-        navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert: alert });  // update other open tabs
-      }
-    } catch(e){}
+    if (window.GOTJ_DB){
+      sendAlertToCloud(title, body);          // syncs to every device via Firestore
+    } else {
+      var alert = { t:title, b:body, id: Date.now() + '-' + Math.random().toString(36).slice(2,7), ts: Date.now() };
+      addAlertToFeed(alert);                  // per-device fallback when cloud not configured
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.controller){
+          navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert: alert });
+        }
+      } catch(e){}
+    }
     showToast('📡 Sent: ' + title);
   }
 
