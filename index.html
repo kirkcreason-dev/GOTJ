@@ -307,7 +307,8 @@ nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
   <!-- ============ GOTJ ============ -->
   <section id="view-gotj" class="view">
     <div class="eyebrow">Gathering Of The Juggalos</div>
-    <h2 class="section-title">GOTJ App</h2>
+    <h2 class="section-title">GOTJ 2026</h2>
+    <div class="card" id="gotj-info"></div>
     <iframe id="gotj-frame" class="gotj-frame" title="GOTJ App" loading="lazy"></iframe>
     <button class="btn ghost block" id="gotj-open" style="margin-top:12px;">Open full screen</button>
     <p class="note">Interactive map, schedule, push alerts & more — powered by your GOTJ app.</p>
@@ -332,10 +333,19 @@ nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
    ===================================================================== */
 const CONFIG = {
   // dismissible banner up top. Set text:"" to hide. Wire to Firestore for push.
-  alert: { text: "THE PHARCYDE JOINS GOTJ 2026 — TAP NEWS", url: "https://www.psychopathicrecords.com/" },
+  alert: { text: "GOTJ 2026 \u00b7 AUG 19\u201322 \u00b7 NEW HOME: LAKE OF THE OZARKS, MO", url: "https://juggalogathering.com/" },
 
   // GOTJ app — relocated to gathering.html so the ICP app can live at /GOTJ/ root
   gotjUrl: "https://kirkcreason-dev.github.io/GOTJ/gathering.html",
+
+  // Live GOTJ 2026 festival info (source: juggalogathering.com)
+  gotjInfo: {
+    name: "26th Annual Gathering of the Juggalos",
+    dates: "August 19\u201322, 2026",
+    venue: "Mother Nature's Riverfront Retreat",
+    address: "Macks Creek, MO \u00b7 Lake of the Ozarks",
+    url: "https://juggalogathering.com/"
+  },
 
   // full store landing (the "Shop the full store" button)
   storeUrl: "https://shop.insaneclownposse.com/",
@@ -375,8 +385,8 @@ const CONFIG = {
   ],
 
   news: [
-    { when:"News", title:"Wednesday Night Cyclone Stage lineup revealed", excerpt:"The GOTJ Wednesday-night Cyclone Stage roster is set — Acid Kult, Crossbreed and more.", img:"", url:"https://www.psychopathicrecords.com/" },
-    { when:"News", title:"The Pharcyde added to GOTJ 2026",               excerpt:"90s hip-hop legends Slimkid3, Imani and Fatlip join this year's Gathering lineup.",      img:"", url:"https://www.psychopathicrecords.com/" }
+    { when:"Just announced", title:"GOTJ 2026: dates & new home revealed", excerpt:"The 26th Gathering hits Mother Nature's Riverfront Retreat in Macks Creek, MO (Lake of the Ozarks), Aug 19\u201322.", img:"", url:"https://juggalogathering.com/" },
+    { when:"Lineup",          title:"First wave: Tech N9ne, Vanilla Ice, The Pharcyde & more", excerpt:"Kraken Stage headliners join DJ Paul, Ouija Macc and two ICP sets \u2014 with Cyclone & Detonation stages stacked.", img:"", url:"https://juggalogathering.com/artists/kraken-stage/" }
   ],
 
   music: [
@@ -488,6 +498,14 @@ function renderAll(){
     `<a href="#" onclick="open('${s.url}');return false;"><span class="g">${s.glyph}</span>${s.label}</a>`).join("");
 
   // gotj
+  const gi = CONFIG.gotjInfo;
+  if(gi){
+    $("gotj-info").innerHTML =
+      `<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:18px;line-height:1.1;">${gi.name}</div>
+       <div style="color:var(--blood-bright);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;margin-top:4px;">${gi.dates}</div>
+       <div style="color:var(--smoke);font-size:13px;margin-top:5px;">${gi.venue}<br>${gi.address}</div>
+       <button class="btn block" style="margin-top:12px;" onclick="open('${gi.url}')">Lineup & tickets</button>`;
+  }
   $("gotj-frame").src = CONFIG.gotjUrl;
   $("gotj-open").onclick = ()=>open(CONFIG.gotjUrl);
 
