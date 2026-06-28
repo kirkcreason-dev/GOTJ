@@ -123,11 +123,20 @@ const DEFAULTS = {
   gotjInfo: {
     name:"26th Annual Gathering of the Juggalos", dates:"August 19\u201322, 2026",
     venue:"Mother Nature's Riverfront Retreat", address:"Macks Creek, MO \u00b7 Lake of the Ozarks",
-    url:"https://juggalogathering.com/"
+    url:"https://juggalogathering.com/gotjtickets/"
   },
+  gotjLinks: [
+    { label:"Tickets",   url:"https://juggalogathering.com/gotjtickets/" },
+    { label:"Lineup",    url:"https://juggalogathering.com/artists/kraken-stage/" },
+    { label:"Event Map", url:"https://juggalogathering.com/event-map/" },
+    { label:"Timeline",  url:"https://juggalogathering.com/timeline/" },
+    { label:"Info",      url:"https://juggalogathering.com/info/" }
+  ],
   news: [
-    { when:"Just announced", title:"GOTJ 2026: dates & new home revealed", excerpt:"The 26th Gathering hits Mother Nature's Riverfront Retreat in Macks Creek, MO (Lake of the Ozarks), Aug 19\u201322.", url:"https://juggalogathering.com/" },
-    { when:"Lineup", title:"First wave: Tech N9ne, Vanilla Ice, The Pharcyde & more", excerpt:"Kraken Stage headliners join DJ Paul, Ouija Macc and two ICP sets.", url:"https://juggalogathering.com/artists/kraken-stage/" }
+    { when:"Just announced", title:"Wednesday Night Cyclone Stage lineup revealed", excerpt:"The Wednesday-night Cyclone Stage roster for GOTJ 2026 is set.", url:"https://www.psychopathicrecords.com/post/wednesday-nights-cylone-stage-lineup-revealed" },
+    { when:"Lineup", title:"The Pharcyde coming to GOTJ 2026", excerpt:"90s hip-hop legends Slimkid3, Imani and Fatlip added to this year's Gathering.", url:"https://www.psychopathicrecords.com/post/check-your-wig-piece-cause-the-pharcyde-is-coming-to-this-years-gotj" },
+    { when:"Lineup", title:"DJ Paul to perform at the Gathering", excerpt:"The Three 6 Mafia legend joins the GOTJ 2026 lineup.", url:"https://www.psychopathicrecords.com/post/dj-paul-the-juggalo-legend-to-perform-at-the-gathering-of-the-juggalos" },
+    { when:"Lineup", title:"Cyclone Stage day artists announced", excerpt:"More Cyclone Stage acts revealed for GOTJ 2026.", url:"https://www.psychopathicrecords.com/post/cyclone-sage-day-artists-announced-for-gotj" }
   ],
   tour: [
     { month:"JUN", day:"27", city:"Pittsburgh, PA", venue:"Stage AE", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610596" },
@@ -160,7 +169,9 @@ const SCHEMA = [
     {k:"text", label:"Banner text", area:true}, {k:"url", label:"Link URL"} ]},
   { key:"gotjInfo", title:"GOTJ Festival Info", type:"object", fields:[
     {k:"name", label:"Festival name"}, {k:"dates", label:"Dates"}, {k:"venue", label:"Venue"},
-    {k:"address", label:"City / area"}, {k:"url", label:"Link URL"} ]},
+    {k:"address", label:"City / area"}, {k:"url", label:"Tickets / link URL"} ]},
+  { key:"gotjLinks", title:"GOTJ Quick Links", type:"array", labelField:"label", fields:[
+    {k:"label", label:"Label", half:true}, {k:"url", label:"URL"} ]},
   { key:"hero", title:"Home Hero Image", type:"object", fields:[
     {k:"img", label:"Image URL (blank = bold text hero)"} ]},
   { key:"news", title:"News Feed", type:"array", labelField:"title", fields:[
@@ -218,7 +229,7 @@ async function handleAuth(user){
 async function loadState(){
   state = JSON.parse(JSON.stringify(DEFAULTS));
   try{
-    const snap = await db.collection("appConfig").doc("live").get();
+    const snap = await db.collection("icpApp").doc("content").get();
     if(snap.exists){
       const d = snap.data()||{};
       SCHEMA.forEach(s=>{ if(d[s.key]!==undefined && d[s.key]!==null) state[s.key]=d[s.key]; });
@@ -231,7 +242,7 @@ $("save").onclick = async ()=>{
   try{
     const payload={}; SCHEMA.forEach(s=> payload[s.key]=state[s.key]);
     payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-    await db.collection("appConfig").doc("live").set(payload, {merge:true});
+    await db.collection("icpApp").doc("content").set(payload, {merge:true});
     setStatus("Published \u2014 the app updates instantly.", "ok");
   }catch(e){ setStatus("Publish failed: "+e.message, "err"); }
 };

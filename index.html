@@ -4,254 +4,162 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0a0a0c" />
-<title>ICP — Official App</title>
+<title>Insane Clown Posse</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0a0a0c;
-  --surface:#141318;
-  --surface-2:#1d1b22;
-  --line:#2a2730;
-  --blood:#c1121f;
-  --blood-bright:#e11d2a;
-  --acid:#86c232;
-  --bone:#ece7da;
-  --smoke:#928d9c;
-  --nav-h:64px;
-  --pad:16px;
+  --ink:#0a0a0c;--surface:#141318;--surface-2:#1d1b22;--line:#2a2730;
+  --blood:#c1121f;--blood-bright:#e11d2a;--acid:#86c232;--bone:#ece7da;--smoke:#928d9c;
+  --nav-h:64px;--pad:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{background:var(--ink);color:var(--bone);font-family:'Inter',system-ui,sans-serif;}
-body{
-  min-height:100vh;
-  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));
-  overscroll-behavior-y:none;
-  background:
-    radial-gradient(120% 60% at 50% -10%, rgba(193,18,31,.18), transparent 60%),
-    var(--ink);
-}
+body{min-height:100vh;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));overscroll-behavior-y:none;
+  background:radial-gradient(120% 60% at 50% -10%, rgba(193,18,31,.18), transparent 60%), var(--ink);}
 img{display:block;max-width:100%;}
 a{color:inherit;text-decoration:none;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
 
-/* ---------- top bar / wordmark ---------- */
-.topbar{
-  position:sticky;top:0;z-index:30;
-  padding:calc(env(safe-area-inset-top) + 14px) var(--pad) 12px;
+.topbar{position:sticky;top:0;z-index:30;padding:calc(env(safe-area-inset-top) + 12px) var(--pad) 11px;
   background:linear-gradient(180deg, rgba(10,10,12,.96), rgba(10,10,12,.7) 70%, transparent);
-  backdrop-filter:blur(8px);
-  display:flex;align-items:center;justify-content:center;gap:10px;
-}
-/* SWAP-IN SLOT: replace this text wordmark with the official ICP logo image.
-   Drop the file at assets/wordmark.png and uncomment the <img>. */
-.wordmark{
-  font-family:'Anton',sans-serif;
-  font-size:24px;letter-spacing:.02em;line-height:.92;
-  text-transform:uppercase;color:var(--bone);text-align:center;
-  -webkit-text-stroke:.6px rgba(0,0,0,.6);
-  text-shadow:0 0 16px rgba(193,18,31,.5), 0 2px 0 rgba(0,0,0,.5);
-}
-.wordmark .lg{display:block;font-size:24px;}
-.wordmark .lg span{color:var(--blood-bright);}
-.wordmark .kick{
-  display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;
-  -webkit-text-stroke:0;text-shadow:none;
-  font-size:9.5px;letter-spacing:.42em;color:var(--smoke);margin-top:3px;padding-left:.42em;
-}
-.wordmark-img{height:42px;width:auto;filter:drop-shadow(0 2px 10px rgba(0,0,0,.6));}
+  backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;gap:11px;}
+.hatchet{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--line);
+  box-shadow:0 0 14px rgba(193,18,31,.45);flex:none;}
+.wordmark-img{height:40px;width:auto;filter:drop-shadow(0 2px 10px rgba(0,0,0,.6));}
+.wordmark{font-family:'Anton',sans-serif;font-size:22px;letter-spacing:.02em;line-height:.92;
+  text-transform:uppercase;color:var(--bone);text-align:center;text-shadow:0 0 16px rgba(193,18,31,.5);}
+.wordmark span{color:var(--blood-bright);}
 
-/* ---------- alert banner (wire to Firestore for live push) ---------- */
-.alert{
-  margin:0 var(--pad) 4px;
-  background:linear-gradient(90deg,var(--blood),#7a0c14);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:12px;padding:11px 14px;
-  display:flex;align-items:center;gap:10px;
-  font-family:'Barlow Condensed',sans-serif;font-weight:600;
-  font-size:15px;letter-spacing:.02em;
-  box-shadow:0 6px 20px rgba(193,18,31,.25);
-}
-.alert .dot{width:8px;height:8px;border-radius:50%;background:var(--bone);flex:none;
-  box-shadow:0 0 0 0 rgba(236,231,218,.7);animation:pulse 1.6s infinite;}
+.alert{margin:0 var(--pad) 4px;background:linear-gradient(90deg,var(--blood),#7a0c14);
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;
+  font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:15px;letter-spacing:.02em;
+  box-shadow:0 6px 20px rgba(193,18,31,.25);}
+.alert .dot{width:8px;height:8px;border-radius:50%;background:var(--bone);flex:none;animation:pulse 1.6s infinite;}
 @keyframes pulse{70%{box-shadow:0 0 0 7px rgba(236,231,218,0);}100%{box-shadow:0 0 0 0 rgba(236,231,218,0);}}
 .alert .x{margin-left:auto;font-size:18px;opacity:.8;padding:2px 4px;}
 .alert.hide{display:none;}
 
-/* ---------- views ---------- */
 main{padding:8px var(--pad) 28px;}
 .view{display:none;animation:fade .25s ease;}
 .view.active{display:block;}
 @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
-.eyebrow{
-  font-family:'Barlow Condensed',sans-serif;font-weight:700;
-  text-transform:uppercase;letter-spacing:.18em;font-size:12px;
-  color:var(--blood-bright);margin:22px 2px 10px;
-}
+.eyebrow{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.18em;font-size:12px;color:var(--blood-bright);margin:22px 2px 10px;}
 .eyebrow:first-child{margin-top:6px;}
-.section-title{
-  font-family:'Anton',sans-serif;text-transform:uppercase;
-  font-size:26px;line-height:1.02;letter-spacing:.02em;margin:0 2px 14px;
-}
+.section-title{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:26px;line-height:1.02;
+  letter-spacing:.02em;margin:0 2px 14px;}
 
-/* hero card */
-.hero{
-  position:relative;border-radius:18px;overflow:hidden;
-  border:1px solid var(--line);
+.hero{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);
   min-height:260px;display:flex;align-items:flex-end;
-  background:
-    radial-gradient(130% 90% at 50% 0%, rgba(193,18,31,.34), transparent 58%),
+  background:radial-gradient(130% 90% at 50% 0%, rgba(193,18,31,.34), transparent 58%),
     repeating-linear-gradient(135deg, rgba(255,255,255,.018) 0 2px, transparent 2px 9px),
-    linear-gradient(180deg, #1a0608 0%, #120409 40%, var(--ink) 100%);
-}
+    linear-gradient(180deg, #1a0608 0%, #120409 40%, var(--ink) 100%);}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.92;}
-.hero::before{ /* light vignette only when an image is present */
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(130% 90% at 50% 20%, transparent 55%, rgba(0,0,0,.5));
-}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(130% 90% at 50% 20%, transparent 55%, rgba(0,0,0,.5));}
 .hero::after{content:"";position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(8,6,9,.15) 0%,transparent 30%,rgba(8,6,9,.92));}
 .hero .cap{position:relative;z-index:2;padding:20px 18px 18px;width:100%;}
-.hero .cap .tag{
-  font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;
-  letter-spacing:.22em;font-size:11px;color:var(--blood-bright);margin-bottom:8px;
-  display:flex;align-items:center;gap:7px;text-shadow:0 1px 6px #000;
-}
+.hero .cap .tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.22em;font-size:11px;color:var(--blood-bright);margin-bottom:8px;display:flex;align-items:center;gap:7px;text-shadow:0 1px 6px #000;}
 .hero .cap .tag::before{content:"";width:18px;height:2px;background:var(--blood-bright);}
-.hero .cap h2{
-  font-family:'Anton',sans-serif;font-size:34px;line-height:.9;text-transform:uppercase;
-  letter-spacing:.01em;text-shadow:0 2px 18px #000;
-  -webkit-text-stroke:.5px rgba(0,0,0,.4);
-}
+.hero .cap h2{font-family:'Anton',sans-serif;font-size:34px;line-height:.9;text-transform:uppercase;
+  letter-spacing:.01em;text-shadow:0 2px 18px #000;-webkit-text-stroke:.5px rgba(0,0,0,.4);}
 .hero .cap h2 em{font-style:normal;color:var(--blood-bright);}
 .hero .cap p{color:#e7e1d5;font-size:13px;margin-top:8px;font-weight:500;text-shadow:0 1px 6px #000;}
 .hero .cap .cta{display:flex;gap:10px;margin-top:15px;}
 
-/* generic card / row */
-.card{
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:14px;padding:14px;margin-bottom:12px;
-}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;}
 .card.tap:active{transform:scale(.99);border-color:var(--blood);}
 
-/* tour row */
 .tour{display:flex;align-items:center;gap:14px;}
-.tour .date{
-  flex:none;text-align:center;width:54px;
-  background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 4px;
-}
-.tour .date .m{font-family:'Barlow Condensed',sans-serif;font-weight:700;
-  text-transform:uppercase;font-size:12px;letter-spacing:.1em;color:var(--blood-bright);}
+.tour .date{flex:none;text-align:center;width:54px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 4px;}
+.tour .date .m{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:12px;letter-spacing:.1em;color:var(--blood-bright);}
 .tour .date .d{font-family:'Anton',sans-serif;font-size:22px;line-height:1;}
 .tour .info{flex:1;min-width:0;}
-.tour .info h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;
-  letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tour .info h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tour .info p{color:var(--smoke);font-size:13px;margin-top:2px;}
-.tour .ticket{flex:none;}
 
-.btn{
-  display:inline-flex;align-items:center;gap:6px;
-  background:var(--blood);color:var(--bone);
-  font-family:'Barlow Condensed',sans-serif;font-weight:700;
-  text-transform:uppercase;letter-spacing:.06em;font-size:14px;
-  padding:9px 14px;border-radius:10px;white-space:nowrap;
-}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--blood);color:var(--bone);
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:14px;
+  padding:9px 14px;border-radius:10px;white-space:nowrap;}
 .btn:active{background:var(--blood-bright);}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--bone);}
-.btn.acid{background:transparent;border:1px solid var(--acid);color:var(--acid);}
 .btn.block{display:flex;width:100%;justify-content:center;padding:13px;font-size:15px;}
 .btn.sm{padding:7px 11px;font-size:13px;}
-.soldout{color:var(--smoke);font-family:'Barlow Condensed',sans-serif;font-weight:700;
-  text-transform:uppercase;font-size:13px;letter-spacing:.08em;}
+.soldout{color:var(--smoke);font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:13px;letter-spacing:.08em;}
 
-/* grids */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.tile{
-  background:var(--surface);border:1px solid var(--line);border-radius:14px;
-  overflow:hidden;display:flex;flex-direction:column;
-}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;}
 .tile .ph{aspect-ratio:1;background:var(--surface-2);position:relative;}
 .tile .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
 .tile .body{padding:11px 12px 13px;}
 .tile h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;line-height:1.05;}
-.tile .price{color:var(--acid);font-family:'Barlow Condensed',sans-serif;font-weight:700;
-  font-size:15px;margin-top:3px;}
+.tile .price{color:var(--acid);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;margin-top:3px;}
 
-/* news */
 .news{display:flex;gap:13px;align-items:flex-start;}
-.news .thumb{flex:none;width:84px;height:84px;border-radius:10px;overflow:hidden;
-  background:var(--surface-2);position:relative;}
+.news .thumb{flex:none;width:84px;height:84px;border-radius:10px;overflow:hidden;background:var(--surface-2);position:relative;display:grid;place-items:center;}
 .news .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.news .thumb .hm{width:46px;height:46px;border-radius:50%;opacity:.85;}
 .news .body{flex:1;min-width:0;}
-.news .body .when{font-family:'Barlow Condensed',sans-serif;font-weight:600;
-  text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--blood-bright);}
-.news .body h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
-  line-height:1.12;margin:3px 0 4px;}
-.news .body p{color:var(--smoke);font-size:13px;line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.news .body .when{font-family:'Barlow Condensed',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--blood-bright);}
+.news .body h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;line-height:1.12;margin:3px 0 4px;}
+.news .body p{color:var(--smoke);font-size:13px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 
-/* media links */
 .media-row{display:flex;align-items:center;gap:13px;}
-.media-row .ic{flex:none;width:44px;height:44px;border-radius:11px;display:grid;place-items:center;
-  background:var(--surface-2);border:1px solid var(--line);font-size:20px;}
+.media-row .ic{flex:none;width:44px;height:44px;border-radius:11px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line);font-size:20px;}
 .media-row .lbl{flex:1;}
 .media-row .lbl h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;}
 .media-row .lbl p{color:var(--smoke);font-size:12.5px;}
 .media-row .chev{color:var(--smoke);font-size:20px;}
 
-/* gotj embed */
-.gotj-frame{
-  width:100%;height:70vh;min-height:420px;border:1px solid var(--line);
-  border-radius:14px;background:var(--surface);
-}
+.quick{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch;}
+.quick::-webkit-scrollbar{display:none;}
+.quick a{flex:none;background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:9px 15px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;font-size:13px;color:var(--bone);}
+.quick a:active{border-color:var(--blood);color:var(--blood-bright);}
 
+details.acc{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+details.acc summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:16px;}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary .c{color:var(--smoke);font-size:13px;}
+details.acc summary::after{content:"+";color:var(--blood-bright);font-size:20px;margin-left:10px;}
+details.acc[open] summary::after{content:"\2212";}
+.lineup{padding:0 14px 14px;color:#cfc9bd;font-size:14px;line-height:1.7;}
+.lineup b{color:var(--bone);}
+
+.gotj-frame{width:100%;height:70vh;min-height:420px;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-top:6px;}
 .note{color:var(--smoke);font-size:12px;line-height:1.5;margin:14px 2px 0;text-align:center;}
 
 .social-strip{display:flex;gap:10px;margin-top:4px;}
-.social-strip a{
-  flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;
-  background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 4px;
-  font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:12px;
-  text-transform:uppercase;letter-spacing:.05em;color:var(--smoke);
-}
+.social-strip a{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 4px;
+  font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--smoke);}
 .social-strip a:active{border-color:var(--blood);color:var(--bone);}
 .social-strip a .g{font-size:18px;color:var(--blood-bright);}
 
-/* ---------- bottom nav ---------- */
-nav{
-  position:fixed;left:0;right:0;bottom:0;z-index:40;
-  height:calc(var(--nav-h) + env(safe-area-inset-bottom));
-  padding-bottom:env(safe-area-inset-bottom);
-  display:flex;background:rgba(15,14,18,.94);backdrop-filter:blur(12px);
-  border-top:1px solid var(--line);
-}
-nav button{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  color:var(--smoke);font-family:'Barlow Condensed',sans-serif;font-weight:600;
-  text-transform:uppercase;letter-spacing:.06em;font-size:11px;
-}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:40;height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);display:flex;background:rgba(15,14,18,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--smoke);
+  font-family:'Barlow Condensed',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:11px;}
 nav button .glyph{font-size:20px;line-height:1;}
 nav button.active{color:var(--blood-bright);}
-nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
 </style>
-<!-- Firebase compat — live content managed via admin.html -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <header class="topbar">
-  <!-- Official ICP logo (hotlinked for demo — self-host in assets/ for production) -->
-  <img class="wordmark-img"
-       src="https://shop.insaneclownposse.com/cdn/shop/files/JECKEL_LOGO_ALT_yellow.png"
-       alt="Insane Clown Posse"
+  <img class="hatchet" id="hatchet" src="https://static.wixstatic.com/media/85c5d2_2d0ad53cdbba4e67950056dc3f329738~mv2.jpg" alt="">
+  <img class="wordmark-img" id="logo"
+       src="https://shop.insaneclownposse.com/cdn/shop/files/JECKEL_LOGO_ALT_yellow.png" alt="Insane Clown Posse"
        onerror="this.style.display='none';document.getElementById('wm-fallback').style.display='block';">
-  <div class="wordmark" id="wm-fallback" style="display:none;">
-    <span class="lg">INSANE <span>CLOWN</span> POSSE</span>
-    <span class="kick">DETROIT &middot; EST. 1989</span>
-  </div>
+  <div class="wordmark" id="wm-fallback" style="display:none;">INSANE <span>CLOWN</span> POSSE</div>
 </header>
 
 <div id="alert" class="alert hide">
@@ -261,33 +169,27 @@ nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
 </div>
 
 <main>
-  <!-- ============ HOME ============ -->
   <section id="view-home" class="view active">
     <div class="hero" id="hero"></div>
-
     <div class="eyebrow">Latest News</div>
     <div id="home-news"></div>
     <button class="btn ghost block" onclick="go('news')">All news</button>
-
     <div class="eyebrow">Next Up</div>
     <div id="home-next"></div>
   </section>
 
-  <!-- ============ NEWS ============ -->
   <section id="view-news" class="view">
     <div class="eyebrow">Official Feed</div>
     <h2 class="section-title">News</h2>
     <div id="news-list"></div>
   </section>
 
-  <!-- ============ TOUR ============ -->
   <section id="view-tour" class="view">
     <div class="eyebrow">On The Road</div>
     <h2 class="section-title">Tour Dates</h2>
     <div id="tour-list"></div>
   </section>
 
-  <!-- ============ SHOP ============ -->
   <section id="view-shop" class="view">
     <div class="eyebrow">Hatchet Gear</div>
     <h2 class="section-title">Merch</h2>
@@ -295,7 +197,6 @@ nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
     <button class="btn block" id="shop-all">Shop the full store</button>
   </section>
 
-  <!-- ============ MEDIA ============ -->
   <section id="view-media" class="view">
     <div class="eyebrow">Listen</div>
     <h2 class="section-title">Music</h2>
@@ -303,21 +204,23 @@ nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
     <div class="eyebrow">Watch</div>
     <h2 class="section-title">Videos</h2>
     <div id="video-list"></div>
+    <div class="eyebrow">The Family</div>
+    <div id="family-list"></div>
     <div class="eyebrow">Follow</div>
     <div class="social-strip" id="social-strip"></div>
   </section>
 
-  <!-- ============ GOTJ ============ -->
   <section id="view-gotj" class="view">
     <div class="eyebrow">Gathering Of The Juggalos</div>
     <h2 class="section-title">GOTJ 2026</h2>
     <div class="card" id="gotj-info"></div>
-    <iframe id="gotj-frame" class="gotj-frame" title="GOTJ App"></iframe>
+    <div class="quick" id="gotj-links"></div>
+    <div class="eyebrow">Lineup</div>
+    <div id="gotj-lineup"></div>
+    <div class="eyebrow">Festival Companion</div>
+    <iframe id="gotj-frame" class="gotj-frame" title="GOTJ" loading="lazy"></iframe>
     <button class="btn ghost block" id="gotj-open" style="margin-top:12px;">Open full screen</button>
-    <p class="note">Interactive map, schedule, push alerts & more — powered by your GOTJ app.</p>
   </section>
-
-  <p class="note" id="news-extra"></p>
 </main>
 
 <nav>
@@ -329,107 +232,106 @@ nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
 </nav>
 
 <script>
-/* =====================================================================
-   CONFIG — edit everything here. Hand this block to J's team to update,
-   or swap it for a Firestore fetch (see fetchConfig() stub at bottom)
-   for live updates + push without re-publishing the app.
-   ===================================================================== */
 const CONFIG = {
-  // dismissible banner up top. Set text:"" to hide. Wire to Firestore for push.
   alert: { text: "GOTJ 2026 \u00b7 AUG 19\u201322 \u00b7 NEW HOME: LAKE OF THE OZARKS, MO", url: "https://juggalogathering.com/" },
-
-  // ICP app lives at /GOTJ/ (index.html); the Gathering app lives at gathering.html.
-  // Embed the Gathering app here (NOT /GOTJ/, which IS this app — that would loop).
   gotjUrl: "https://kirkcreason-dev.github.io/GOTJ/gathering.html",
-
-  // Live GOTJ 2026 festival info (source: juggalogathering.com)
-  gotjInfo: {
-    name: "26th Annual Gathering of the Juggalos",
-    dates: "August 19\u201322, 2026",
-    venue: "Mother Nature's Riverfront Retreat",
-    address: "Macks Creek, MO \u00b7 Lake of the Ozarks",
-    url: "https://juggalogathering.com/"
-  },
-
-  // full store landing (the "Shop the full store" button)
   storeUrl: "https://shop.insaneclownposse.com/",
+  hero: { img: "https://shop.insaneclownposse.com/cdn/shop/files/image001.png" },
 
-  hero: {
-    title: "Insane Clown Posse",
-    sub: "Official app — tour, merch, news & GOTJ",
-    // Official store banner (hotlinked for demo — self-host for production). Leave "" for branded text hero.
-    img: "https://shop.insaneclownposse.com/cdn/shop/files/image001.png"
+  gotjInfo: {
+    name:"26th Annual Gathering of the Juggalos",
+    dates:"August 19\u201322, 2026",
+    venue:"Mother Nature's Riverfront Retreat",
+    address:"Macks Creek, MO \u00b7 Lake of the Ozarks",
+    url:"https://juggalogathering.com/gotjtickets/"
+  },
+  gotjLinks: [
+    { label:"Tickets",   url:"https://juggalogathering.com/gotjtickets/" },
+    { label:"Lineup",    url:"https://juggalogathering.com/artists/kraken-stage/" },
+    { label:"Event Map", url:"https://juggalogathering.com/event-map/" },
+    { label:"Timeline",  url:"https://juggalogathering.com/timeline/" },
+    { label:"Info",      url:"https://juggalogathering.com/info/" }
+  ],
+  gotjLineup: {
+    "Kraken Stage": ["Tech N9ne","Vanilla Ice","The Pharcyde","DJ Paul","Ouija Macc","Diggy Graves","ICP \u2013 A Walk Through the Darkness","ICP \u2013 A Walk Through the Light","Michael Trapson Glowtown Live","More coming soon"],
+    "Cyclone Stage": ["HIM","Crossbreed","MC Lars","Acid Kult's Goat God Summoning","Bible Belt Massacre","GLOOM UNIT","LSP's Devils Trident","Summoner's Circle","Atrocity Girl","Buried Within","Death Benefits","Durtnap","EquallyOpposite","HomiSui","Matt Foy","Maybsomeday","Mereness","Mic Ange7o","NGS","NiveK","Our Inner Circle","Rysk Framtiden","Scream At The Sky","Seuss Mace","Sinshrift","TaeBo Tha Truth","The Tenebrous Trio","Tso Ghostly","VenomStayDrippin","Zero Signal","Zitro","ZXL","More coming soon"],
+    "Detonation Stage": ["Big Chronic","CARBS","Jayne Dough","Riddy K","Sleep Lyrical","SP@D3Z","STRAY & NOVLS","Swift Homicide","A.Z. The Fallen","Awesome Ray Ray","Billy Da Fence & Brokenstarr","Bloody Ruckus","Chuckklez","CX da Grinch","Deadly Combination","DEADSET","E-Low The Artist","Evol Cook","Fro5o187","J Cruz TLO","Knockturnal","Lil Tytan","Lugnut","Nastie Ink","Outlaw716","Project Omerta","Randum45","Ruin The Moment","slim-N-wavy","Swing Dee Diablo","The God Mumm Ra","The Ice Giant","Tony Slippaz","YaBoi LoCo","Zak Pacillo","More coming soon"]
   },
 
-  // Live ICP tour dates (source: official Bandsintown feed). status: 'onsale' | 'soldout' | 'notify'
   tour: [
-    { month:"JUN", day:"27", city:"Pittsburgh, PA",  venue:"Stage AE",                       status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610596" },
-    { month:"JUN", day:"28", city:"Newport, KY",     venue:"MegaCorp Pavilion",              status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610664" },
-    { month:"JUL", day:"10", city:"Cadillac, MI",    venue:"See event details",              status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108390334" },
-    { month:"JUL", day:"16", city:"Cadott, WI",      venue:"Rock Fest 2026",                 status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1037901697" },
-    { month:"AUG", day:"14", city:"Sturgis, SD",     venue:"Full Throttle Saloon",           status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108453922" },
-    { month:"SEP", day:"04", city:"Columbus, OH",    venue:"KEMBA Live!",                     status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610149" },
-    { month:"SEP", day:"05", city:"St Louis, MO",    venue:"The Pageant",                    status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610274" },
-    { month:"SEP", day:"06", city:"Pryor, OK",       venue:"Rocklahoma",                     status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108505320" },
-    { month:"SEP", day:"10", city:"Omaha, NE",       venue:"The Admiral Theater",            status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108505330" },
-    { month:"SEP", day:"11", city:"Kansas City, MO", venue:"The Truman",                     status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610260" },
-    { month:"SEP", day:"12", city:"Denver, CO",      venue:"Mission Ballroom",               status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610003" },
-    { month:"SEP", day:"20", city:"Chicago, IL",     venue:"Riot Fest 2026",                 status:"notify", ticketUrl:"https://www.bandsintown.com/e/108447569" },
-    { month:"OCT", day:"02", city:"Sacramento, CA",  venue:"Aftershock 2026",                status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038224917" },
-    { month:"OCT", day:"03", city:"Anaheim, CA",     venue:"House of Blues Anaheim",         status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610217" },
-    { month:"OCT", day:"04", city:"Riverside, CA",   venue:"Riverside Municipal Auditorium", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610253" }
+    { month:"JUN", day:"27", city:"Pittsburgh, PA", venue:"Stage AE", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610596" },
+    { month:"JUN", day:"28", city:"Newport, KY", venue:"MegaCorp Pavilion", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610664" },
+    { month:"JUL", day:"10", city:"Cadillac, MI", venue:"See event details", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108390334" },
+    { month:"JUL", day:"16", city:"Cadott, WI", venue:"Rock Fest 2026", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1037901697" },
+    { month:"AUG", day:"14", city:"Sturgis, SD", venue:"Full Throttle Saloon", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108453922" },
+    { month:"SEP", day:"04", city:"Columbus, OH", venue:"KEMBA Live!", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610149" },
+    { month:"SEP", day:"05", city:"St Louis, MO", venue:"The Pageant", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610274" },
+    { month:"SEP", day:"06", city:"Pryor, OK", venue:"Rocklahoma", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108505320" },
+    { month:"SEP", day:"10", city:"Omaha, NE", venue:"The Admiral Theater", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108505330" },
+    { month:"SEP", day:"11", city:"Kansas City, MO", venue:"The Truman", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610260" },
+    { month:"SEP", day:"12", city:"Denver, CO", venue:"Mission Ballroom", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610003" },
+    { month:"SEP", day:"20", city:"Chicago, IL", venue:"Riot Fest 2026", status:"notify", ticketUrl:"https://www.bandsintown.com/e/108447569" },
+    { month:"OCT", day:"02", city:"Sacramento, CA", venue:"Aftershock 2026", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038224917" },
+    { month:"OCT", day:"03", city:"Anaheim, CA", venue:"House of Blues Anaheim", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610217" },
+    { month:"OCT", day:"04", city:"Riverside, CA", venue:"Riverside Municipal Auditorium", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610253" }
   ],
 
-  // Real products from the official store
   merch: [
     { name:"Running With Axes Zip Hoodie", price:"$75", img:"https://shop.insaneclownposse.com/cdn/shop/files/CARTOONSWITHAXES-HOODIEBLK1.png", url:"https://shop.insaneclownposse.com/products/running-with-axes-zip-hoodie" },
-    { name:"Ringmaster Vintage Tee",       price:"$40", img:"https://shop.insaneclownposse.com/cdn/shop/files/IMG_5078.png",                    url:"https://shop.insaneclownposse.com/products/ringmaster-retro-t-shirt" },
-    { name:"What Up Ninja Zip Hoodie",     price:"$75", img:"https://shop.insaneclownposse.com/cdn/shop/files/WHATUPNINJA-HOODIEBLK1.png",       url:"https://shop.insaneclownposse.com/products/what-up-ninja-zip-hoodie" },
-    { name:"Riddle Box Vintage Tee",       price:"$40", img:"https://shop.insaneclownposse.com/cdn/shop/files/IMG_5019.png",                    url:"https://shop.insaneclownposse.com/products/riddle-box-retro-t-shirt" }
+    { name:"Ringmaster Vintage Tee", price:"$40", img:"https://shop.insaneclownposse.com/cdn/shop/files/IMG_5078.png", url:"https://shop.insaneclownposse.com/products/ringmaster-retro-t-shirt" },
+    { name:"What Up Ninja Zip Hoodie", price:"$75", img:"https://shop.insaneclownposse.com/cdn/shop/files/WHATUPNINJA-HOODIEBLK1.png", url:"https://shop.insaneclownposse.com/products/what-up-ninja-zip-hoodie" },
+    { name:"Riddle Box Vintage Tee", price:"$40", img:"https://shop.insaneclownposse.com/cdn/shop/files/IMG_5019.png", url:"https://shop.insaneclownposse.com/products/riddle-box-retro-t-shirt" }
   ],
 
   news: [
-    { when:"Just announced", title:"GOTJ 2026: dates & new home revealed", excerpt:"The 26th Gathering hits Mother Nature's Riverfront Retreat in Macks Creek, MO (Lake of the Ozarks), Aug 19\u201322.", img:"", url:"https://juggalogathering.com/" },
-    { when:"Lineup",          title:"First wave: Tech N9ne, Vanilla Ice, The Pharcyde & more", excerpt:"Kraken Stage headliners join DJ Paul, Ouija Macc and two ICP sets \u2014 with Cyclone & Detonation stages stacked.", img:"", url:"https://juggalogathering.com/artists/kraken-stage/" }
+    { when:"Just announced", title:"Wednesday Night Cyclone Stage lineup revealed", excerpt:"The Wednesday-night Cyclone Stage roster for GOTJ 2026 is set.", url:"https://www.psychopathicrecords.com/post/wednesday-nights-cylone-stage-lineup-revealed" },
+    { when:"Lineup", title:"The Pharcyde coming to GOTJ 2026", excerpt:"90s hip-hop legends Slimkid3, Imani and Fatlip added to this year's Gathering.", url:"https://www.psychopathicrecords.com/post/check-your-wig-piece-cause-the-pharcyde-is-coming-to-this-years-gotj" },
+    { when:"Lineup", title:"DJ Paul to perform at the Gathering", excerpt:"The Three 6 Mafia legend joins the GOTJ 2026 lineup.", url:"https://www.psychopathicrecords.com/post/dj-paul-the-juggalo-legend-to-perform-at-the-gathering-of-the-juggalos" },
+    { when:"Lineup", title:"Cyclone Stage day artists announced", excerpt:"More Cyclone Stage acts revealed for GOTJ 2026.", url:"https://www.psychopathicrecords.com/post/cyclone-sage-day-artists-announced-for-gotj" }
   ],
 
   music: [
-    { label:"Spotify",      sub:"Full discography",   glyph:"&#9835;", url:"https://open.spotify.com/artist/4xtWjIlVuZwTCeqVAsgEXy" },
-    { label:"Apple Music",  sub:"Albums & singles",   glyph:"&#9834;", url:"https://itunes.apple.com/us/artist/insane-clown-posse/266434" },
-    { label:"Amazon Music", sub:"Stream & buy",       glyph:"&#9835;", url:"https://www.amazon.com/Insane-Clown-Posse/e/B000APTMEU" }
+    { label:"Spotify", sub:"Full discography", glyph:"&#9835;", url:"https://open.spotify.com/artist/4xtWjIlVuZwTCeqVAsgEXy" },
+    { label:"Apple Music", sub:"Albums & singles", glyph:"&#9834;", url:"https://itunes.apple.com/us/artist/insane-clown-posse/266434" },
+    { label:"Amazon Music", sub:"Stream & buy", glyph:"&#9835;", url:"https://www.amazon.com/Insane-Clown-Posse/e/B000APTMEU" }
   ],
 
   video: [
     { label:"Psychopathic Video", sub:"Official YouTube channel", glyph:"&#9658;", url:"https://www.youtube.com/user/PsychopathicVideo" },
-    { label:"JCW Lunacy",         sub:"Wrestling playlist",       glyph:"&#9658;", url:"https://www.youtube.com/playlist?list=PLgXsvesMhfSn1NhdjzCxfclLW5LyCujlz" },
-    { label:"The Vault",          sub:"Rare & exclusive video",   glyph:"&#9658;", url:"https://psychopathicvault.com/" }
+    { label:"JCW Lunacy", sub:"Wrestling playlist", glyph:"&#9658;", url:"https://www.youtube.com/playlist?list=PLgXsvesMhfSn1NhdjzCxfclLW5LyCujlz" },
+    { label:"The Vault", sub:"Rare & exclusive video", glyph:"&#9658;", url:"https://psychopathicvault.com/" }
+  ],
+
+  family: [
+    { label:"Insane Clown Posse", sub:"Psychopathic Records", glyph:"&#9760;", url:"https://www.psychopathicrecords.com/artists" },
+    { label:"Ouija Macc", sub:"Psychopathic Records", glyph:"&#9760;", url:"https://www.psychopathicrecords.com/artists" },
+    { label:"Wakko the Kidd", sub:"Psychopathic Records", glyph:"&#9760;", url:"https://www.psychopathicrecords.com/artists" }
   ],
 
   social: [
     { label:"Instagram", glyph:"&#9673;", url:"https://www.instagram.com/therealicp" },
-    { label:"Facebook",  glyph:"&#9612;", url:"https://www.facebook.com/INSANECLOWNPOSSE" },
-    { label:"TikTok",    glyph:"&#9834;", url:"https://www.tiktok.com/@insaneclownposse" },
-    { label:"X",         glyph:"&#10006;", url:"https://www.twitter.com/ICP" }
+    { label:"Facebook", glyph:"&#9612;", url:"https://www.facebook.com/INSANECLOWNPOSSE" },
+    { label:"TikTok", glyph:"&#9834;", url:"https://www.tiktok.com/@insaneclownposse" },
+    { label:"X", glyph:"&#10006;", url:"https://www.twitter.com/ICP" }
   ]
 };
 
-/* ---------------- render ---------------- */
-const $ = (id)=>document.getElementById(id);
-const open = (url)=>{ if(url) window.open(url,"_blank","noopener"); };
+const HATCHET = "https://static.wixstatic.com/media/85c5d2_2d0ad53cdbba4e67950056dc3f329738~mv2.jpg";
 
-function ph(img){ return img ? `<img src="${img}" alt="" onerror="this.remove()">` : ""; }
+const $ = (id)=>document.getElementById(id);
+function openUrl(url){
+  if(!url) return;
+  try{ const w = window.open(url, "_blank", "noopener"); if(!w) location.href = url; }
+  catch(e){ location.href = url; }
+}
+function ph(img){ return img ? `<img src="${img}" alt="" onerror="this.remove()">` : `<img class="hm" src="${HATCHET}" alt="">`; }
 
 function renderHero(){
   const h=CONFIG.hero;
   const next=CONFIG.tour.find(t=>t.status!=="soldout")||CONFIG.tour[0];
   const nextLine = next ? `Next: ${next.city} &middot; ${next.month} ${next.day}` : "";
-  // With official banner art we let the art carry the brand (header already has the logo);
-  // without it we fall back to a bold text hero.
-  const img = h.img
-    ? `<img src="${h.img}" alt="Insane Clown Posse" onerror="this.remove();document.getElementById('hero').classList.add('no-img');">`
-    : "";
+  const img = h.img ? `<img src="${h.img}" alt="Insane Clown Posse" onerror="this.remove()">` : "";
   const title = h.img ? "" : `<h2>INSANE <em>CLOWN</em> POSSE</h2>`;
-  $("hero").className = "hero" + (h.img ? "" : " no-img");
   $("hero").innerHTML = `${img}
     <div class="cap">
       <div class="tag">Official App</div>
@@ -443,35 +345,29 @@ function renderHero(){
 }
 
 function newsCard(n){
-  return `<div class="card tap news" onclick="open('${n.url}')">
+  return `<div class="card tap news" onclick="openUrl('${n.url}')">
     <div class="thumb">${ph(n.img)}</div>
-    <div class="body">
-      <div class="when">${n.when}</div>
-      <h3>${n.title}</h3>
-      <p>${n.excerpt}</p>
-    </div></div>`;
+    <div class="body"><div class="when">${n.when}</div><h3>${n.title}</h3><p>${n.excerpt}</p></div></div>`;
 }
 
 function tourRow(t){
   let action;
   if(t.status==="soldout") action = `<span class="soldout">Sold out</span>`;
-  else if(t.status==="notify") action = `<button class="btn sm ghost ticket" onclick="open('${t.ticketUrl}')">Notify me</button>`;
-  else action = `<button class="btn sm ticket" onclick="open('${t.ticketUrl}')">Tickets</button>`;
+  else if(t.status==="notify") action = `<button class="btn sm ghost" onclick="openUrl('${t.ticketUrl}')">Notify me</button>`;
+  else action = `<button class="btn sm" onclick="openUrl('${t.ticketUrl}')">Tickets</button>`;
   return `<div class="card tour">
     <div class="date"><div class="m">${t.month}</div><div class="d">${t.day}</div></div>
-    <div class="info"><h3>${t.city}</h3><p>${t.venue}</p></div>
-    ${action}</div>`;
+    <div class="info"><h3>${t.city}</h3><p>${t.venue}</p></div>${action}</div>`;
 }
 
 function merchTile(m){
-  return `<div class="tile tap" onclick="open('${m.url}')">
-    <div class="ph">${ph(m.img)}</div>
-    <div class="body"><h3>${m.name}</h3><div class="price">${m.price}</div></div>
-  </div>`;
+  return `<div class="tile tap" onclick="openUrl('${m.url}')">
+    <div class="ph">${m.img?`<img src="${m.img}" alt="" onerror="this.remove()">`:""}</div>
+    <div class="body"><h3>${m.name}</h3><div class="price">${m.price}</div></div></div>`;
 }
 
 function mediaRow(m){
-  return `<div class="card tap media-row" onclick="open('${m.url}')">
+  return `<div class="card tap media-row" onclick="openUrl('${m.url}')">
     <div class="ic">${m.glyph}</div>
     <div class="lbl"><h3>${m.label}</h3><p>${m.sub}</p></div>
     <div class="chev">&rsaquo;</div></div>`;
@@ -480,49 +376,46 @@ function mediaRow(m){
 function renderAll(){
   renderHero();
 
-  // home: latest 2 news + next show
   $("home-news").innerHTML = CONFIG.news.slice(0,2).map(newsCard).join("");
   $("news-list").innerHTML = CONFIG.news.map(newsCard).join("");
   const next = CONFIG.tour.find(t=>t.status!=="soldout") || CONFIG.tour[0];
   $("home-next").innerHTML = next ? tourRow(next) : `<p class="note">No dates announced yet.</p>`;
 
-  // tour
-  $("tour-list").innerHTML = CONFIG.tour.length
-    ? CONFIG.tour.map(tourRow).join("")
-    : `<p class="note">No dates announced yet — check back soon.</p>`;
+  $("tour-list").innerHTML = CONFIG.tour.length ? CONFIG.tour.map(tourRow).join("") : `<p class="note">No dates announced yet.</p>`;
 
-  // shop
   $("shop-grid").innerHTML = CONFIG.merch.map(merchTile).join("");
-  $("shop-all").onclick = ()=>open(CONFIG.storeUrl);
+  $("shop-all").onclick = ()=>openUrl(CONFIG.storeUrl);
 
-  // media
   $("music-list").innerHTML = CONFIG.music.map(mediaRow).join("");
   $("video-list").innerHTML = CONFIG.video.map(mediaRow).join("");
+  $("family-list").innerHTML = (CONFIG.family||[]).map(mediaRow).join("");
   $("social-strip").innerHTML = (CONFIG.social||[]).map(s=>
-    `<a href="#" onclick="open('${s.url}');return false;"><span class="g">${s.glyph}</span>${s.label}</a>`).join("");
+    `<a href="#" onclick="openUrl('${s.url}');return false;"><span class="g">${s.glyph}</span>${s.label}</a>`).join("");
 
-  // gotj
   const gi = CONFIG.gotjInfo;
   if(gi){
     $("gotj-info").innerHTML =
       `<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:18px;line-height:1.1;">${gi.name}</div>
        <div style="color:var(--blood-bright);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;margin-top:4px;">${gi.dates}</div>
        <div style="color:var(--smoke);font-size:13px;margin-top:5px;">${gi.venue}<br>${gi.address}</div>
-       <button class="btn block" style="margin-top:12px;" onclick="open('${gi.url}')">Lineup & tickets</button>`;
+       <button class="btn block" style="margin-top:12px;" onclick="openUrl('${gi.url}')">Get tickets</button>`;
   }
+  $("gotj-links").innerHTML = (CONFIG.gotjLinks||[]).map(l=>
+    `<a href="#" onclick="openUrl('${l.url}');return false;">${l.label}</a>`).join("");
+  $("gotj-lineup").innerHTML = Object.entries(CONFIG.gotjLineup||{}).map(([stage,acts])=>
+    `<details class="acc"><summary>${stage}<span class="c">${acts.filter(a=>a!=="More coming soon").length} acts</span></summary>
+     <div class="lineup">${acts.map(a=>a==="More coming soon"?`<i>${a}</i>`:`<b>${a}</b>`).join("  &middot;  ")}</div></details>`).join("");
   $("gotj-frame").src = CONFIG.gotjUrl;
-  $("gotj-open").onclick = ()=>open(CONFIG.gotjUrl);
+  $("gotj-open").onclick = ()=>openUrl(CONFIG.gotjUrl);
 
-  // alert
   if(CONFIG.alert && CONFIG.alert.text){
     $("alert-text").textContent = CONFIG.alert.text;
     $("alert").classList.remove("hide");
-    if(CONFIG.alert.url) $("alert").onclick = (e)=>{ if(!e.target.classList.contains('x')) open(CONFIG.alert.url); };
+    if(CONFIG.alert.url) $("alert").onclick = (e)=>{ if(!e.target.classList.contains('x')) openUrl(CONFIG.alert.url); };
   }
 }
 function dismissAlert(){ $("alert").classList.add("hide"); }
 
-/* ---------------- tab nav ---------------- */
 function go(tab){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   $("view-"+tab).classList.add("active");
@@ -534,22 +427,12 @@ function go(tab){
 document.querySelectorAll("nav button").forEach(b=>
   b.addEventListener("click", ()=>go(b.dataset.tab)));
 
-/* ---------------- live content from Firestore ----------------
-   Content is editable from admin.html. Paste the SAME Firebase web config
-   into BOTH files. Until you do, the app just uses the built-in defaults above.
-
-   PUSH ALERTS: in the native WebView/WKWebView wrapper, register the device
-   with Firebase Cloud Messaging. The in-app banner reads CONFIG.alert — have
-   your FCM payload also write the alert to the Firestore doc below and a push
-   lands as both a system notification (native) and the in-app banner (web).
---------------------------------------------------------------- */
 const FIREBASE_CONFIG = {
   apiKey: "PASTE_API_KEY",
   authDomain: "PASTE_PROJECT.firebaseapp.com",
   projectId: "PASTE_PROJECT_ID",
   appId: "PASTE_APP_ID"
 };
-
 async function loadRemoteConfig(){
   try{
     if(typeof firebase==="undefined") return;
@@ -558,14 +441,14 @@ async function loadRemoteConfig(){
     const snap = await firebase.firestore().collection("icpApp").doc("content").get();
     if(!snap.exists) return;
     const d = snap.data() || {};
-    ["alert","hero","gotjInfo","tour","merch","news","music","video","social","storeUrl","gotjUrl"]
+    ["alert","hero","gotjInfo","gotjLinks","gotjLineup","tour","merch","news","music","video","family","social","storeUrl","gotjUrl"]
       .forEach(k=>{ if(d[k]!==undefined && d[k]!==null) CONFIG[k] = d[k]; });
     renderAll();
-  }catch(e){ console.warn("Live content unavailable — using built-in defaults.", e); }
+  }catch(e){}
 }
 
-renderAll();          // instant: built-in defaults
-loadRemoteConfig();   // then refresh with live content from the admin panel
+renderAll();
+loadRemoteConfig();
 </script>
 </body>
 </html>
