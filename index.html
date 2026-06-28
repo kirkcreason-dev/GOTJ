@@ -236,6 +236,9 @@ nav button .glyph{font-size:20px;line-height:1;}
 nav button.active{color:var(--blood-bright);}
 nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
 </style>
+<!-- Firebase compat — live content managed via admin.html -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -309,7 +312,7 @@ nav button.active .glyph{filter:drop-shadow(0 0 8px rgba(193,18,31,.6));}
     <div class="eyebrow">Gathering Of The Juggalos</div>
     <h2 class="section-title">GOTJ 2026</h2>
     <div class="card" id="gotj-info"></div>
-    <iframe id="gotj-frame" class="gotj-frame" title="GOTJ App" loading="lazy"></iframe>
+    <iframe id="gotj-frame" class="gotj-frame" title="GOTJ App"></iframe>
     <button class="btn ghost block" id="gotj-open" style="margin-top:12px;">Open full screen</button>
     <p class="note">Interactive map, schedule, push alerts & more — powered by your GOTJ app.</p>
   </section>
@@ -335,8 +338,11 @@ const CONFIG = {
   // dismissible banner up top. Set text:"" to hide. Wire to Firestore for push.
   alert: { text: "GOTJ 2026 \u00b7 AUG 19\u201322 \u00b7 NEW HOME: LAKE OF THE OZARKS, MO", url: "https://juggalogathering.com/" },
 
-  // GOTJ app — relocated to gathering.html so the ICP app can live at /GOTJ/ root
-  gotjUrl: "https://kirkcreason-dev.github.io/GOTJ/gathering.html",
+  // GOTJ app embed.
+  //   - While the ICP app is NOT yet hosted at /GOTJ/ : keep this as the live GOTJ URL below (it works now).
+  //   - WHEN you deploy this ICP app as /GOTJ/index.html : first rename the old GOTJ index.html to
+  //     gathering.html, THEN change this to ".../GOTJ/gathering.html" (otherwise the tab would load itself).
+  gotjUrl: "https://kirkcreason-dev.github.io/GOTJ/",
 
   // Live GOTJ 2026 festival info (source: juggalogathering.com)
   gotjInfo: {
@@ -530,26 +536,38 @@ function go(tab){
 document.querySelectorAll("nav button").forEach(b=>
   b.addEventListener("click", ()=>go(b.dataset.tab)));
 
-/* ---------------- live config (optional) ----------------
-   Replace the static CONFIG above with live data from Firestore so J's
-   team updates tour/merch/news/alerts without re-publishing. Sketch:
+/* ---------------- live content from Firestore ----------------
+   Content is editable from admin.html. Paste the SAME Firebase web config
+   into BOTH files. Until you do, the app just uses the built-in defaults above.
 
-   async function fetchConfig(){
-     const r = await fetch("https://YOUR-WORKER.workers.dev/config.json");
-     const data = await r.json();
-     Object.assign(CONFIG, data);
-     renderAll();
-   }
-   // fetchConfig();   // call after renderAll() for instant-then-fresh
-
-   PUSH ALERTS: in the Android (WKWebView/WebView) wrapper, register the
-   device with Firebase Cloud Messaging on the native side. The in-app
-   banner above reads CONFIG.alert — point it at the same Firestore doc
-   your FCM payload writes to, and a push lands as both a system
-   notification (native) and the in-app banner (web).
+   PUSH ALERTS: in the native WebView/WKWebView wrapper, register the device
+   with Firebase Cloud Messaging. The in-app banner reads CONFIG.alert — have
+   your FCM payload also write the alert to the Firestore doc below and a push
+   lands as both a system notification (native) and the in-app banner (web).
 --------------------------------------------------------------- */
+const FIREBASE_CONFIG = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID",
+  appId: "PASTE_APP_ID"
+};
 
-renderAll();
+async function loadRemoteConfig(){
+  try{
+    if(typeof firebase==="undefined") return;
+    if(!FIREBASE_CONFIG.projectId || FIREBASE_CONFIG.projectId==="PASTE_PROJECT_ID") return;
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const snap = await firebase.firestore().collection("appConfig").doc("live").get();
+    if(!snap.exists) return;
+    const d = snap.data() || {};
+    ["alert","hero","gotjInfo","tour","merch","news","music","video","social","storeUrl","gotjUrl"]
+      .forEach(k=>{ if(d[k]!==undefined && d[k]!==null) CONFIG[k] = d[k]; });
+    renderAll();
+  }catch(e){ console.warn("Live content unavailable — using built-in defaults.", e); }
+}
+
+renderAll();          // instant: built-in defaults
+loadRemoteConfig();   // then refresh with live content from the admin panel
 </script>
 </body>
 </html>

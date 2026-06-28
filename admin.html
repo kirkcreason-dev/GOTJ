@@ -1,333 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>GOTJ 2026 · Operations Console (Admin)</title>
-<meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#0c0805">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GOTJ Ops">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0c" />
+<title>ICP App — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0c0805; --panel:#1c150d; --panel2:#271d11; --line:#4a3a22;
-    --ink:#f4e9d2; --muted:#b8a37e; --blood:#c5283d; --acid:#79c23a;
-    --violet:#b06bdd; --amber:#e8a23a; --gold:#e8c66a; --glow:0 0 16px;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:'Oswald',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:680px;margin:0 auto;padding:22px 16px 60px}
-  .hd{text-align:center;margin:8px 0 6px}
-  .hd h1{font-family:'Pirata One';font-weight:400;font-size:clamp(26px,6vw,38px);
-    color:var(--gold);margin:0;letter-spacing:.03em}
-  .hd .sub{color:var(--muted);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
-  .admin-note{display:flex;align-items:center;gap:10px;background:rgba(176,107,221,.10);
-    border:1px solid rgba(176,107,221,.45);border-radius:12px;padding:12px 14px;
-    margin:18px 0;color:var(--ink);font-size:13px;line-height:1.45}
-  .admin-note .lock{font-size:18px;flex-shrink:0}
-  .admin-note strong{color:var(--violet);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-  .pitch-h{font-family:'Pirata One';font-weight:400;font-size:clamp(20px,4vw,26px);
-    color:var(--gold);text-align:center;margin:26px 0 14px;letter-spacing:.03em}
-  .alertbar{display:flex;align-items:center;gap:14px;justify-content:space-between;
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:4px 0 16px}
-  .alertbar-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
-  .alertbar-txt strong{font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);font-size:14px}
-  .alertbar-txt span{color:var(--muted);font-size:12.5px;line-height:1.35}
-  .alert-enable{flex-shrink:0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:13px;
-    color:#1a1206;background:var(--amber);border:0;border-radius:999px;padding:11px 18px;cursor:pointer;
-    transition:.15s;box-shadow:var(--glow) rgba(232,162,58,.35)}
-  .alert-enable:hover{filter:brightness(1.07)}
-  .alert-enable:disabled{background:var(--panel2);color:var(--muted);box-shadow:none;cursor:default}
-  .alertbar.on{border-color:var(--acid)}
-  .alertbar.on .alertbar-txt strong{color:var(--acid)}
-  .ios-hint{background:rgba(232,162,58,.08);border:1px solid var(--line);border-radius:12px;
-    padding:12px 14px;margin:0 0 16px;color:var(--ink);font-size:13px;line-height:1.5}
-  .ios-hint strong{color:var(--gold)}
-  .emer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin-bottom:12px}
-  .emer-btn{background:var(--panel);border:1px solid rgba(197,40,61,.38);border-radius:12px;
-    padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;
-    transition:.14s;color:var(--ink)}
-  .emer-btn:hover{border-color:var(--blood);background:var(--panel2)}
-  .emer-btn:active{transform:scale(.97)}
-  .emer-btn.vendor{border-color:rgba(232,162,58,.45)}
-  .emer-btn.vendor:hover{border-color:var(--amber)}
-  .emer-btn .ei{font-size:22px}
-  .emer-btn .el{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:10px;text-align:center;line-height:1.3}
-  .emer-tagline{text-align:center;font-weight:600;font-size:14px;color:var(--blood);letter-spacing:.06em;margin:10px 0 18px}
-  .emer-tagline.vendor{color:var(--amber)}
-  .footnote{margin-top:34px;text-align:center;color:var(--line);font-size:11px;line-height:1.5;letter-spacing:.04em}
-  .back{display:inline-block;margin-top:6px;color:var(--muted);font-size:12px;text-decoration:none;letter-spacing:.06em;text-transform:uppercase}
-  .back:hover{color:var(--gold)}
-  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
-    background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:999px;
-    padding:11px 20px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .cscrim{position:fixed;inset:0;background:rgba(0,0,0,.62);opacity:0;pointer-events:none;transition:.2s;z-index:60}
-  .cscrim.show{opacity:1;pointer-events:auto}
-  .cbox{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);width:min(460px,92vw);
-    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;z-index:61;
-    opacity:0;pointer-events:none;transition:.2s;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-  .cbox.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
-  .cbox h3{font-family:'Pirata One';color:var(--gold);font-size:23px;margin:0 0 3px;font-weight:400}
-  .cbox .clab{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:11px}
-  .cbox textarea{width:100%;min-height:96px;resize:vertical;background:var(--bg);color:var(--ink);
-    border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;line-height:1.45}
-  .cbox textarea:focus{outline:none;border-color:var(--amber)}
-  .ccount{text-align:right;color:var(--muted);font-size:11px;margin-top:4px}
-  .crow{display:flex;gap:10px;margin-top:14px}
-  .cbtn{flex:1;font-family:'Oswald';font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-    font-size:13px;border:0;border-radius:999px;padding:12px;cursor:pointer;transition:.15s}
-  .cbtn.send{background:var(--amber);color:#1a1206;box-shadow:var(--glow) rgba(232,162,58,.35)}
-  .cbtn.send:hover{filter:brightness(1.07)}
-  .cbtn.cancel{background:var(--panel2);color:var(--muted)}
-  .cbtn.cancel:hover{color:var(--ink)}
-  .pushprev{position:fixed;left:50%;top:14px;transform:translate(-50%,-150%);width:min(420px,94vw);
-    background:rgba(28,21,13,.97);border:1px solid var(--line);border-radius:16px;padding:12px 14px;
-    display:flex;gap:11px;align-items:flex-start;z-index:70;box-shadow:0 14px 40px rgba(0,0,0,.55);
-    opacity:0;transition:transform .3s,opacity .3s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-  .pushprev.show{transform:translate(-50%,0);opacity:1}
-  .pushprev img{width:38px;height:38px;border-radius:9px;flex-shrink:0}
-  .pushprev .pp-b{min-width:0;flex:1}
-  .pushprev .pp-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
-  .pushprev .pp-app{font-family:'Oswald';font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:10px;color:var(--muted)}
-  .pushprev .pp-now{font-size:10px;color:var(--muted)}
-  .pushprev .pp-title{font-weight:700;font-size:14px;color:var(--ink);margin:2px 0 1px}
-  .pushprev .pp-body{font-size:13px;color:var(--muted);line-height:1.4}
+:root{
+  --ink:#0a0a0c;--surface:#141318;--surface-2:#1d1b22;--line:#2a2730;
+  --blood:#c1121f;--blood-bright:#e11d2a;--acid:#86c232;--bone:#ece7da;--smoke:#928d9c;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--ink);color:var(--bone);font-family:'Inter',system-ui,sans-serif;
+  padding:0 0 120px;min-height:100vh;
+  background:radial-gradient(120% 50% at 50% -10%, rgba(193,18,31,.16), transparent 60%), var(--ink);}
+.wrap{max-width:680px;margin:0 auto;padding:18px 16px;}
+h1{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:26px;letter-spacing:.02em;
+  text-shadow:0 0 16px rgba(193,18,31,.5);}
+.sub{color:var(--smoke);font-size:13px;margin-top:4px;}
+label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;font-size:12px;color:var(--smoke);margin:12px 0 5px;}
+input,textarea,select{
+  width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;
+  color:var(--bone);font-family:inherit;font-size:14px;padding:10px 11px;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blood);}
+textarea{resize:vertical;min-height:58px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;
+  background:var(--blood);color:var(--bone);border:none;border-radius:10px;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;font-size:15px;padding:12px 16px;}
+.btn:active{background:var(--blood-bright);}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--bone);}
+.btn.sm{padding:7px 11px;font-size:13px;}
+.btn.block{display:flex;width:100%;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0;}
+.section-title{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:18px;
+  letter-spacing:.02em;margin-bottom:2px;color:var(--bone);}
+.section-title .eb{color:var(--blood-bright);}
+.item{border:1px solid var(--line);border-radius:11px;padding:12px;margin:11px 0;background:var(--surface-2);}
+.item .row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;}
+.item .row-top span{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--smoke);
+  text-transform:uppercase;letter-spacing:.06em;font-size:12px;}
+.del{color:var(--blood-bright);background:none;border:none;cursor:pointer;font-size:13px;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.savebar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px env(safe-area-inset-bottom);
+  background:rgba(15,14,18,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);
+  display:flex;gap:12px;align-items:center;}
+.savebar .status{flex:1;font-size:13px;color:var(--smoke);}
+.savebar .status.ok{color:var(--acid);}
+.savebar .status.err{color:var(--blood-bright);}
+.hidden{display:none!important;}
+.note{color:var(--smoke);font-size:12px;line-height:1.5;margin-top:8px;}
+.center{min-height:80vh;display:flex;flex-direction:column;justify-content:center;}
+.warn{background:rgba(193,18,31,.12);border:1px solid var(--blood);border-radius:10px;
+  padding:11px 13px;font-size:13px;color:#f3cdd1;margin:12px 0;}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div class="wrap">
-    <div class="hd">
-      <h1>Operations Console</h1>
-      <div class="sub">GOTJ 2026 · Admin</div>
-    </div>
+<div class="wrap">
 
-    <div class="admin-note">
-      <span class="lock">🔒</span>
-      <span><strong>Admin Only</strong> — This console sends official alerts to every fan with the app. It is separate from the fan app and is not linked from it. In production this page is behind a staff login.</span>
-    </div>
-
-    <div class="alertbar" id="alertbar">
-      <div class="alertbar-txt">
-        <strong id="alertStatus">Alerts are off</strong>
-        <span id="alertSub">Enable to send and receive alerts on this device.</span>
-      </div>
-      <button class="alert-enable" id="enableAlerts">🔔 Enable Alerts</button>
-    </div>
-    <div class="ios-hint" id="iosHint" hidden>
-      📲 On iPhone, tap the <strong>Share</strong> icon, then <strong>“Add to Home Screen,”</strong>
-      open this console from the Home Screen, then Enable Alerts.
-    </div>
-
-    <h2 class="pitch-h">Emergency &amp; Operations</h2>
-    <div class="emer-grid">
-      <button class="emer-btn"><span class="ei">🏥</span><span class="el">Medical</span></button>
-      <button class="emer-btn"><span class="ei">🔒</span><span class="el">Security</span></button>
-      <button class="emer-btn"><span class="ei">🔍</span><span class="el">Lost &amp; Found</span></button>
-      <button class="emer-btn"><span class="ei">⛈️</span><span class="el">Weather Alert</span></button>
-      <button class="emer-btn"><span class="ei">🅿️</span><span class="el">Parking Update</span></button>
-      <button class="emer-btn"><span class="ei">🚧</span><span class="el">Road / Entry Update</span></button>
-      <button class="emer-btn"><span class="ei">⏰</span><span class="el">Schedule Delay</span></button>
-      <button class="emer-btn"><span class="ei">🧒</span><span class="el">Missing Person / Lost Child Alert</span></button>
-      <button class="emer-btn"><span class="ei">📢</span><span class="el">Emergency Broadcast</span></button>
-    </div>
-    <p class="emer-tagline">One official alert reaches every fan using the app.</p>
-
-    <h2 class="pitch-h" style="margin-top:10px">Vendor Alerts</h2>
-    <div class="emer-grid">
-      <button class="emer-btn vendor"><span class="ei">🛒</span><span class="el">Vendor Deal</span></button>
-      <button class="emer-btn vendor"><span class="ei">🍔</span><span class="el">Food &amp; Drink</span></button>
-      <button class="emer-btn vendor"><span class="ei">🎁</span><span class="el">Merch Drop</span></button>
-    </div>
-    <p class="emer-tagline vendor">Vendors &amp; sponsors can ping fans on the grounds in real time — a built-in paid channel.</p>
-
-    <p class="footnote">
-      Built by Kirk Creason · Private GOTJ 2026 companion app concept · Not for public release ·
-      Official branding and map use subject to GOTJ/Psychopathic written approval<br>
-      <a class="back" href="index.html">← Back to fan app</a>
-    </p>
+  <!-- ===== not-configured notice ===== -->
+  <div id="setup" class="hidden">
+    <h1>Admin Setup Needed</h1>
+    <div class="warn">Paste your Firebase web config into <b>FIREBASE_CONFIG</b> in this file
+      (and the same config into the app's <b>index.html</b>), then reload.</div>
+    <p class="note">Firebase Console → Project settings → Your apps → Web app → SDK setup &amp; configuration.</p>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <!-- ===== login ===== -->
+  <div id="login" class="center hidden">
+    <h1>ICP App <span style="color:var(--blood-bright)">Admin</span></h1>
+    <p class="sub">Sign in to manage app content.</p>
+    <div class="card">
+      <label>Email</label>
+      <input id="email" type="email" autocomplete="username" />
+      <label>Password</label>
+      <input id="password" type="password" autocomplete="current-password" />
+      <button class="btn block" id="signin" style="margin-top:14px;">Sign in</button>
+      <p class="note" id="loginerr" style="color:var(--blood-bright)"></p>
+    </div>
+  </div>
 
-  <div class="pushprev" id="pushPrev">
-    <img src="icon-192.png" alt="">
-    <div class="pp-b">
-      <div class="pp-top"><span class="pp-app">GOTJ 2026</span><span class="pp-now">now</span></div>
-      <div class="pp-title" id="ppTitle"></div>
-      <div class="pp-body" id="ppBody"></div>
+  <!-- ===== editor ===== -->
+  <div id="editor" class="hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div><h1>Content <span style="color:var(--blood-bright)">Admin</span></h1>
+        <p class="sub" id="who"></p></div>
+      <button class="btn ghost sm" id="signout">Sign out</button>
     </div>
+    <div id="sections"></div>
   </div>
-  <div class="cscrim" id="cscrim"></div>
-  <div class="cbox" id="cbox" role="dialog" aria-modal="true" aria-labelledby="cTitle">
-    <h3 id="cTitle">Alert</h3>
-    <div class="clab">Message sent to fans</div>
-    <textarea id="cText" placeholder="Type the alert message…" maxlength="240"></textarea>
-    <div class="ccount"><span id="cCount">0</span>/240</div>
-    <div class="crow">
-      <button class="cbtn cancel" id="cCancel">Cancel</button>
-      <button class="cbtn send" id="cSend">📡 Send Alert</button>
-    </div>
-  </div>
+</div>
+
+<!-- ===== save bar ===== -->
+<div class="savebar hidden" id="savebar">
+  <div class="status" id="status">Ready</div>
+  <button class="btn" id="save">Publish changes</button>
+</div>
 
 <script>
-(function(){
-  var toastEl = document.getElementById('toast'), toastTimer = null;
-  function showToast(msg){
-    toastEl.textContent = msg; toastEl.classList.add('show');
-    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3400);
+/* ============================================================
+   PASTE THE SAME FIREBASE CONFIG HERE AND IN index.html
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID",
+  appId: "PASTE_APP_ID"
+};
+
+/* Defaults shown the first time (before anything is published).
+   These mirror the app's built-in content so you edit from a full starting point. */
+const DEFAULTS = {
+  alert: { text: "GOTJ 2026 \u00b7 AUG 19\u201322 \u00b7 NEW HOME: LAKE OF THE OZARKS, MO", url: "https://juggalogathering.com/" },
+  hero:  { img: "https://shop.insaneclownposse.com/cdn/shop/files/image001.png" },
+  gotjInfo: {
+    name:"26th Annual Gathering of the Juggalos", dates:"August 19\u201322, 2026",
+    venue:"Mother Nature's Riverfront Retreat", address:"Macks Creek, MO \u00b7 Lake of the Ozarks",
+    url:"https://juggalogathering.com/"
+  },
+  news: [
+    { when:"Just announced", title:"GOTJ 2026: dates & new home revealed", excerpt:"The 26th Gathering hits Mother Nature's Riverfront Retreat in Macks Creek, MO (Lake of the Ozarks), Aug 19\u201322.", url:"https://juggalogathering.com/" },
+    { when:"Lineup", title:"First wave: Tech N9ne, Vanilla Ice, The Pharcyde & more", excerpt:"Kraken Stage headliners join DJ Paul, Ouija Macc and two ICP sets.", url:"https://juggalogathering.com/artists/kraken-stage/" }
+  ],
+  tour: [
+    { month:"JUN", day:"27", city:"Pittsburgh, PA", venue:"Stage AE", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610596" },
+    { month:"JUN", day:"28", city:"Newport, KY", venue:"MegaCorp Pavilion", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610664" },
+    { month:"JUL", day:"10", city:"Cadillac, MI", venue:"See event details", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108390334" },
+    { month:"JUL", day:"16", city:"Cadott, WI", venue:"Rock Fest 2026", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1037901697" },
+    { month:"AUG", day:"14", city:"Sturgis, SD", venue:"Full Throttle Saloon", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108453922" },
+    { month:"SEP", day:"04", city:"Columbus, OH", venue:"KEMBA Live!", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610149" },
+    { month:"SEP", day:"05", city:"St Louis, MO", venue:"The Pageant", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610274" },
+    { month:"SEP", day:"06", city:"Pryor, OK", venue:"Rocklahoma", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108505320" },
+    { month:"SEP", day:"10", city:"Omaha, NE", venue:"The Admiral Theater", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/108505330" },
+    { month:"SEP", day:"11", city:"Kansas City, MO", venue:"The Truman", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610260" },
+    { month:"SEP", day:"12", city:"Denver, CO", venue:"Mission Ballroom", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610003" },
+    { month:"SEP", day:"20", city:"Chicago, IL", venue:"Riot Fest 2026", status:"notify", ticketUrl:"https://www.bandsintown.com/e/108447569" },
+    { month:"OCT", day:"02", city:"Sacramento, CA", venue:"Aftershock 2026", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038224917" },
+    { month:"OCT", day:"03", city:"Anaheim, CA", venue:"House of Blues Anaheim", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610217" },
+    { month:"OCT", day:"04", city:"Riverside, CA", venue:"Riverside Municipal Auditorium", status:"onsale", ticketUrl:"https://www.bandsintown.com/t/1038610253" }
+  ],
+  merch: [
+    { name:"Running With Axes Zip Hoodie", price:"$75", img:"https://shop.insaneclownposse.com/cdn/shop/files/CARTOONSWITHAXES-HOODIEBLK1.png", url:"https://shop.insaneclownposse.com/products/running-with-axes-zip-hoodie" },
+    { name:"Ringmaster Vintage Tee", price:"$40", img:"https://shop.insaneclownposse.com/cdn/shop/files/IMG_5078.png", url:"https://shop.insaneclownposse.com/products/ringmaster-retro-t-shirt" },
+    { name:"What Up Ninja Zip Hoodie", price:"$75", img:"https://shop.insaneclownposse.com/cdn/shop/files/WHATUPNINJA-HOODIEBLK1.png", url:"https://shop.insaneclownposse.com/products/what-up-ninja-zip-hoodie" },
+    { name:"Riddle Box Vintage Tee", price:"$40", img:"https://shop.insaneclownposse.com/cdn/shop/files/IMG_5019.png", url:"https://shop.insaneclownposse.com/products/riddle-box-retro-t-shirt" }
+  ]
+};
+
+/* Field schema — drives the whole editor */
+const SCHEMA = [
+  { key:"alert", title:"Alert Banner", type:"object", fields:[
+    {k:"text", label:"Banner text", area:true}, {k:"url", label:"Link URL"} ]},
+  { key:"gotjInfo", title:"GOTJ Festival Info", type:"object", fields:[
+    {k:"name", label:"Festival name"}, {k:"dates", label:"Dates"}, {k:"venue", label:"Venue"},
+    {k:"address", label:"City / area"}, {k:"url", label:"Link URL"} ]},
+  { key:"hero", title:"Home Hero Image", type:"object", fields:[
+    {k:"img", label:"Image URL (blank = bold text hero)"} ]},
+  { key:"news", title:"News Feed", type:"array", labelField:"title", fields:[
+    {k:"when", label:"Tag (e.g. Just announced)"}, {k:"title", label:"Headline"},
+    {k:"excerpt", label:"Summary", area:true}, {k:"url", label:"Link URL"} ]},
+  { key:"tour", title:"Tour Dates", type:"array", labelField:"city", fields:[
+    {k:"month", label:"Month", half:true}, {k:"day", label:"Day", half:true},
+    {k:"city", label:"City, ST"}, {k:"venue", label:"Venue"},
+    {k:"status", label:"Status", select:["onsale","soldout","notify"], half:true},
+    {k:"ticketUrl", label:"Ticket URL"} ]},
+  { key:"merch", title:"Merch", type:"array", labelField:"name", fields:[
+    {k:"name", label:"Product name"}, {k:"price", label:"Price", half:true},
+    {k:"img", label:"Image URL"}, {k:"url", label:"Product URL"} ]}
+];
+
+const $=id=>document.getElementById(id);
+let state = {};   // working copy being edited
+let db=null, configured=false;
+
+/* ---------- boot ---------- */
+try{
+  configured = FIREBASE_CONFIG.projectId && FIREBASE_CONFIG.projectId!=="PASTE_PROJECT_ID";
+  if(configured){
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    firebase.auth().onAuthStateChanged(handleAuth);
+  } else {
+    show("setup");
   }
+}catch(e){ show("setup"); console.error(e); }
 
-  var swReg = null;
-  var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-                     || window.navigator.standalone === true;
-  var isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  var canNotify = ('Notification' in window);
+function show(which){
+  ["setup","login","editor"].forEach(id=>$(id).classList.toggle("hidden", id!==which));
+  $("savebar").classList.toggle("hidden", which!=="editor");
+}
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js', { scope: './' })
-      .then(function(reg){ swReg = reg; })
-      .catch(function(){});
-  }
+/* ---------- auth ---------- */
+$("signin").onclick = async ()=>{
+  $("loginerr").textContent="";
+  try{
+    await firebase.auth().signInWithEmailAndPassword($("email").value.trim(), $("password").value);
+  }catch(e){ $("loginerr").textContent = e.message; }
+};
+$("signout").onclick = ()=> firebase.auth().signOut();
 
-  var ALERTS = {
-    'Medical': { t:'🏥 Medical Alert', b:'Medical team dispatched. Nearest first-aid station is marked on the map.' },
-    'Security': { t:'🔒 Security Alert', b:'Security is responding. Please follow staff instructions.' },
-    'Lost & Found': { t:'🔍 Lost & Found', b:'Lost or found something? Lost & Found is at the Box Office.' },
-    'Weather Alert': { t:'⛈️ Weather Alert', b:'Severe weather incoming — seek shelter and wait for the all-clear.' },
-    'Parking Update': { t:'🅿️ Parking Update', b:'Parking & shuttle update. Open the app for the latest.' },
-    'Road / Entry Update': { t:'🚧 Road / Entry Update', b:'Entry and road conditions have changed. Allow extra time.' },
-    'Schedule Delay': { t:'⏰ Schedule Delay', b:'A set time has shifted. Open the schedule for the update.' },
-    'Missing Person / Lost Child Alert': { t:'🧒 Missing Person Alert', b:'Please help reunite — details in the app. Report sightings to nearest staff.' },
-    'Emergency Broadcast': { t:'📢 Emergency Broadcast', b:'Official emergency message. Follow all staff and posted signage.' },
-    'Vendor Deal': { t:'🛒 Vendor Deal', b:'A featured vendor is running a special right now — tap to see who.' },
-    'Food & Drink': { t:'🍔 Food & Drink', b:'Food & drink update — a vendor just opened or restocked on the grounds.' },
-    'Merch Drop': { t:'🎁 Merch Drop', b:'Limited merch drop happening now at the marketplace. First come, first served.' }
-  };
+async function handleAuth(user){
+  if(!user){ show("login"); return; }
+  $("who").textContent = "Signed in as " + user.email;
+  show("editor");
+  await loadState();
+  renderEditor();
+}
 
-  var bar = document.getElementById('alertbar');
-  var statusEl = document.getElementById('alertStatus');
-  var subEl = document.getElementById('alertSub');
-  var enableBtn = document.getElementById('enableAlerts');
-  var iosHint = document.getElementById('iosHint');
-
-  function updateAlertUI(){
-    var granted = canNotify && Notification.permission === 'granted';
-    if (iosHint) iosHint.hidden = true;
-    if (granted){
-      bar.classList.add('on');
-      statusEl.textContent = 'Alerts on';
-      subEl.textContent = 'Sends also fire a real notification on this device.';
-      enableBtn.textContent = '✓ Enabled'; enableBtn.disabled = true;
-    } else {
-      bar.classList.remove('on');
-      statusEl.textContent = 'Live demo';
-      enableBtn.disabled = false; enableBtn.textContent = '🔔 Enable Device Alerts';
-      subEl.textContent = 'Tap any alert to try it — works right here. Enable for a real device notification too.';
-      if (!canNotify){ enableBtn.disabled = true; enableBtn.textContent = '🔔 Alerts'; }
+/* ---------- load / save ---------- */
+async function loadState(){
+  state = JSON.parse(JSON.stringify(DEFAULTS));
+  try{
+    const snap = await db.collection("appConfig").doc("live").get();
+    if(snap.exists){
+      const d = snap.data()||{};
+      SCHEMA.forEach(s=>{ if(d[s.key]!==undefined && d[s.key]!==null) state[s.key]=d[s.key]; });
     }
-  }
+  }catch(e){ setStatus("Couldn't load saved content: "+e.message, "err"); }
+}
 
-  var pushPrev = document.getElementById('pushPrev');
-  var ppTitle = document.getElementById('ppTitle');
-  var ppBody = document.getElementById('ppBody');
-  var ppTimer = null;
-  function showPushPreview(title, body){
-    if (!pushPrev) return;
-    ppTitle.textContent = title; ppBody.textContent = body;
-    pushPrev.classList.add('show');
-    clearTimeout(ppTimer); ppTimer = setTimeout(function(){ pushPrev.classList.remove('show'); }, 4500);
-  }
-  if (pushPrev){ pushPrev.addEventListener('click', function(){ pushPrev.classList.remove('show'); }); }
+$("save").onclick = async ()=>{
+  setStatus("Publishing\u2026");
+  try{
+    const payload={}; SCHEMA.forEach(s=> payload[s.key]=state[s.key]);
+    payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+    await db.collection("appConfig").doc("live").set(payload, {merge:true});
+    setStatus("Published \u2014 the app updates instantly.", "ok");
+  }catch(e){ setStatus("Publish failed: "+e.message, "err"); }
+};
+function setStatus(t, cls){ const el=$("status"); el.textContent=t; el.className="status"+(cls?" "+cls:""); }
 
-  function fireAlert(title, body){
-    showPushPreview(title, body);
-    var opts = { body:body, tag:'gotj-ops', renotify:true, icon:'icon-192.png',
-                 badge:'icon-192.png', vibrate:[120,60,120], data:{ url:'./' } };
-    try {
-      if (swReg && swReg.showNotification){ swReg.showNotification(title, opts); }
-      else if (canNotify){ new Notification(title, opts); }
-    } catch(e){}
-    // Relay to any open fan tabs so their feed updates live (same browser / Stage 2 push handles cross-device).
-    if (window.GOTJ_DB){
-      try {
-        window.GOTJ_DB.collection('alerts').add({ t:title, b:body, tsMs: Date.now(),
-          ts: firebase.firestore.FieldValue.serverTimestamp() });   // syncs to every device
-      } catch(e){ console.warn('cloud send failed', e); }
+/* ---------- editor render ---------- */
+function renderEditor(){
+  const root=$("sections"); root.innerHTML="";
+  SCHEMA.forEach(s=>{
+    const card=document.createElement("div"); card.className="card";
+    card.innerHTML=`<div class="section-title"><span class="eb">/</span> ${s.title}</div>`;
+    if(s.type==="object"){
+      card.appendChild(objectFields(s, state[s.key]||(state[s.key]={})));
     } else {
-      try {
-        if (navigator.serviceWorker && navigator.serviceWorker.controller){
-          navigator.serviceWorker.controller.postMessage({ type:'relay-alert', alert:{ t:title, b:body } });
-        }
-      } catch(e){}
+      const list=document.createElement("div");
+      (state[s.key]||(state[s.key]=[])).forEach((item,i)=> list.appendChild(arrayItem(s,item,i)));
+      card.appendChild(list);
+      const add=document.createElement("button");
+      add.className="btn ghost sm"; add.style.marginTop="10px"; add.textContent="+ Add "+s.title.replace(/s$/,'');
+      add.onclick=()=>{ const blank={}; s.fields.forEach(f=>blank[f.k]=f.select?f.select[0]:""); state[s.key].push(blank); renderEditor(); };
+      card.appendChild(add);
     }
-    showToast('📡 Sent: ' + title);
-  }
-
-  /* ----- Compose: type a custom message for any alert before sending ----- */
-  var cscrim = document.getElementById('cscrim');
-  var cbox = document.getElementById('cbox');
-  var cTitle = document.getElementById('cTitle');
-  var cText = document.getElementById('cText');
-  var cCount = document.getElementById('cCount');
-  var cSend = document.getElementById('cSend');
-  var cCancel = document.getElementById('cCancel');
-  var composeTitle = '';
-
-  function openCompose(label){
-    var a = ALERTS[label] || { t:'📢 GOTJ 2026', b:'' };
-    composeTitle = a.t;
-    cTitle.textContent = a.t;
-    cText.value = a.b;                 // prefilled default — edit or replace
-    cCount.textContent = cText.value.length;
-    cscrim.classList.add('show'); cbox.classList.add('show');
-    setTimeout(function(){ cText.focus(); cText.select(); }, 60);
-  }
-  function closeCompose(){ cscrim.classList.remove('show'); cbox.classList.remove('show'); }
-
-  if (cText){ cText.addEventListener('input', function(){ cCount.textContent = cText.value.length; }); }
-  if (cCancel){ cCancel.addEventListener('click', closeCompose); }
-  if (cscrim){ cscrim.addEventListener('click', closeCompose); }
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeCompose(); });
-  if (cSend){
-    cSend.addEventListener('click', function(){
-      var body = cText.value.trim();
-      if (!body){ cText.focus(); showToast('Type a message first.'); return; }
-      fireAlert(composeTitle, body);
-      closeCompose();
-    });
-  }
-
-  if (enableBtn){
-    enableBtn.addEventListener('click', function(){
-      if (isiOS && !isStandalone){ if (iosHint) iosHint.hidden = false; return; }
-      if (!canNotify){ showToast('This browser does not support notifications.'); return; }
-      Notification.requestPermission().then(function(p){
-        updateAlertUI();
-        if (p === 'granted'){ showToast('🔔 Alerts enabled.'); }
-        else if (p === 'denied'){ showToast('Alerts blocked — enable them in your browser settings.'); }
-      });
-    });
-  }
-
-  [].forEach.call(document.querySelectorAll('.emer-btn'), function(b){
-    b.addEventListener('click', function(){
-      var label = (b.querySelector('.el') || {}).textContent || 'Alert';
-      openCompose(label);   // demo: always works, no enable / Home Screen required
-    });
+    root.appendChild(card);
   });
+}
 
-  updateAlertUI();
-})();
+function field(f, obj){
+  const wrap=document.createElement("div");
+  if(f.half) wrap.style.cssText="";
+  const lbl=document.createElement("label"); lbl.textContent=f.label; wrap.appendChild(lbl);
+  let el;
+  if(f.select){
+    el=document.createElement("select");
+    f.select.forEach(o=>{ const op=document.createElement("option"); op.value=o; op.textContent=o; el.appendChild(op); });
+    el.value=obj[f.k]||f.select[0];
+  } else if(f.area){
+    el=document.createElement("textarea"); el.value=obj[f.k]||"";
+  } else {
+    el=document.createElement("input"); el.type="text"; el.value=obj[f.k]||"";
+  }
+  el.oninput=()=>{ obj[f.k]=el.value; };
+  wrap.appendChild(el);
+  return wrap;
+}
+
+function objectFields(s, obj){
+  const frag=document.createElement("div");
+  s.fields.forEach(f=> frag.appendChild(field(f,obj)));
+  return frag;
+}
+
+function arrayItem(s, item, i){
+  const box=document.createElement("div"); box.className="item";
+  const top=document.createElement("div"); top.className="row-top";
+  top.innerHTML=`<span>${(item[s.labelField]||("Item "+(i+1)))}</span>`;
+  const del=document.createElement("button"); del.className="del"; del.textContent="Remove";
+  del.onclick=()=>{ state[s.key].splice(i,1); renderEditor(); };
+  top.appendChild(del); box.appendChild(top);
+  // group half-width fields in pairs
+  let pairBuf=[];
+  const flush=()=>{ if(pairBuf.length){ const g=document.createElement("div"); g.className="grid2"; pairBuf.forEach(n=>g.appendChild(n)); box.appendChild(g); pairBuf=[]; } };
+  s.fields.forEach(f=>{
+    const node=field(f,item);
+    if(f.half){ pairBuf.push(node); if(pairBuf.length===2) flush(); }
+    else { flush(); box.appendChild(node); }
+  });
+  flush();
+  return box;
+}
 </script>
 </body>
 </html>
