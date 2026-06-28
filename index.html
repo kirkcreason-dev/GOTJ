@@ -338,11 +338,9 @@ const CONFIG = {
   // dismissible banner up top. Set text:"" to hide. Wire to Firestore for push.
   alert: { text: "GOTJ 2026 \u00b7 AUG 19\u201322 \u00b7 NEW HOME: LAKE OF THE OZARKS, MO", url: "https://juggalogathering.com/" },
 
-  // GOTJ app embed.
-  //   - While the ICP app is NOT yet hosted at /GOTJ/ : keep this as the live GOTJ URL below (it works now).
-  //   - WHEN you deploy this ICP app as /GOTJ/index.html : first rename the old GOTJ index.html to
-  //     gathering.html, THEN change this to ".../GOTJ/gathering.html" (otherwise the tab would load itself).
-  gotjUrl: "https://kirkcreason-dev.github.io/GOTJ/",
+  // ICP app lives at /GOTJ/ (index.html); the Gathering app lives at gathering.html.
+  // Embed the Gathering app here (NOT /GOTJ/, which IS this app — that would loop).
+  gotjUrl: "https://kirkcreason-dev.github.io/GOTJ/gathering.html",
 
   // Live GOTJ 2026 festival info (source: juggalogathering.com)
   gotjInfo: {
@@ -557,7 +555,7 @@ async function loadRemoteConfig(){
     if(typeof firebase==="undefined") return;
     if(!FIREBASE_CONFIG.projectId || FIREBASE_CONFIG.projectId==="PASTE_PROJECT_ID") return;
     if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-    const snap = await firebase.firestore().collection("appConfig").doc("live").get();
+    const snap = await firebase.firestore().collection("icpApp").doc("content").get();
     if(!snap.exists) return;
     const d = snap.data() || {};
     ["alert","hero","gotjInfo","tour","merch","news","music","video","social","storeUrl","gotjUrl"]
