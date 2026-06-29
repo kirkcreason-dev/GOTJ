@@ -53,24 +53,19 @@ main{padding:8px var(--pad) 28px;}
   letter-spacing:.02em;margin:0 2px 14px;}
 
 .hero{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);
-  min-height:260px;display:flex;align-items:flex-end;
-  background:radial-gradient(130% 90% at 50% 0%, rgba(193,18,31,.34), transparent 58%),
-    repeating-linear-gradient(135deg, rgba(255,255,255,.018) 0 2px, transparent 2px 9px),
-    linear-gradient(180deg, #1a0608 0%, #120409 40%, var(--ink) 100%);}
-.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.92;}
-.hero::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(130% 90% at 50% 20%, transparent 55%, rgba(0,0,0,.5));}
-.hero::after{content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(8,6,9,.15) 0%,transparent 30%,rgba(8,6,9,.92));}
-.hero .cap{position:relative;z-index:2;padding:20px 18px 18px;width:100%;}
+  background:radial-gradient(130% 90% at 50% 0%, rgba(193,18,31,.30), transparent 58%),
+    linear-gradient(180deg, #1a0608 0%, #120409 45%, var(--ink) 100%);}
+.hero.no-img{min-height:240px;display:flex;align-items:flex-end;}
+.hero.has-img img{display:block;width:100%;height:auto;}
+.hero .cap{position:relative;z-index:2;padding:15px 18px 17px;width:100%;}
 .hero .cap .tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;
-  letter-spacing:.22em;font-size:11px;color:var(--blood-bright);margin-bottom:8px;display:flex;align-items:center;gap:7px;text-shadow:0 1px 6px #000;}
+  letter-spacing:.22em;font-size:11px;color:var(--blood-bright);margin-bottom:7px;display:flex;align-items:center;gap:7px;}
 .hero .cap .tag::before{content:"";width:18px;height:2px;background:var(--blood-bright);}
 .hero .cap h2{font-family:'Anton',sans-serif;font-size:34px;line-height:.9;text-transform:uppercase;
   letter-spacing:.01em;text-shadow:0 2px 18px #000;-webkit-text-stroke:.5px rgba(0,0,0,.4);}
 .hero .cap h2 em{font-style:normal;color:var(--blood-bright);}
-.hero .cap p{color:#e7e1d5;font-size:13px;margin-top:8px;font-weight:500;text-shadow:0 1px 6px #000;}
-.hero .cap .cta{display:flex;gap:10px;margin-top:15px;}
+.hero .cap p{color:#cfc9bd;font-size:13px;margin-top:6px;font-weight:500;}
+.hero .cap .cta{display:flex;gap:10px;margin-top:13px;}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;}
 .card.tap:active{transform:scale(.99);border-color:var(--blood);}
@@ -145,6 +140,15 @@ details.acc[open] summary::after{content:"\2212";}
   font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:17px;color:var(--smoke);}
 .game-rotate .ic{font-size:40px;color:var(--blood-bright);animation:rot 2.4s ease-in-out infinite;}
 @keyframes rot{0%,40%{transform:rotate(0);}60%,100%{transform:rotate(90deg);}}
+.game-exit{display:none;position:absolute;top:10px;right:10px;z-index:5;width:40px;height:40px;border-radius:50%;
+  background:rgba(10,10,12,.72);border:1px solid var(--line);color:var(--bone);font-size:24px;line-height:1;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+@media (orientation:landscape){
+  body.games-active{overflow:hidden;}
+  body.games-active .game-stage{position:fixed;inset:0;z-index:100;margin:0;}
+  body.games-active #game-frame{width:100vw;height:100vh;height:100dvh;min-height:0;border:0;border-radius:0;}
+  body.games-active .game-exit{display:flex;}
+}
 .note{color:var(--smoke);font-size:12px;line-height:1.5;margin:14px 2px 0;text-align:center;}
 
 .social-strip{display:flex;gap:10px;margin-top:4px;}
@@ -239,6 +243,7 @@ nav button.active{color:var(--blood-bright);}
     <div id="games-list"></div>
     <div class="eyebrow">Now Playing</div>
     <div class="game-stage">
+      <button class="game-exit" onclick="go('home')" aria-label="Exit game">&times;</button>
       <div class="game-rotate"><div class="ic">&#8635;</div>Rotate your device<br>to play</div>
       <iframe id="game-frame" class="gotj-frame" title="Game" loading="lazy" allowfullscreen allow="fullscreen; autoplay; gamepad"></iframe>
     </div>
@@ -372,8 +377,9 @@ function renderHero(){
   const h=CONFIG.hero;
   const next=CONFIG.tour.find(t=>t.status!=="soldout")||CONFIG.tour[0];
   const nextLine = next ? `Next: ${next.city} &middot; ${next.month} ${next.day}` : "";
-  const img = h.img ? `<img src="${h.img}" alt="Insane Clown Posse" onerror="this.remove()">` : "";
+  const img = h.img ? `<img src="${h.img}" alt="Insane Clown Posse" onerror="this.closest('.hero').classList.remove('has-img');this.closest('.hero').classList.add('no-img');this.remove()">` : "";
   const title = h.img ? "" : `<h2>INSANE <em>CLOWN</em> POSSE</h2>`;
+  $("hero").className = "hero " + (h.img ? "has-img" : "no-img");
   $("hero").innerHTML = `${img}
     <div class="cap">
       <div class="tag">Official App</div>
@@ -479,6 +485,7 @@ function dismissAlert(){ $("alert").classList.add("hide"); }
 function go(tab){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   $("view-"+tab).classList.add("active");
+  document.body.classList.toggle("games-active", tab==="games");
   if(tab==="games" && CONFIG.games && CONFIG.games[0]) loadGameFrame(CONFIG.games[0].url);
   const hasBtn = [...document.querySelectorAll("nav button")].some(b=>b.dataset.tab===tab);
   document.querySelectorAll("nav button").forEach(b=>
