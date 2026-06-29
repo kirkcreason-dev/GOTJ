@@ -221,6 +221,15 @@ nav button.active{color:var(--blood-bright);}
     <iframe id="gotj-frame" class="gotj-frame" title="GOTJ" loading="lazy"></iframe>
     <button class="btn ghost block" id="gotj-open" style="margin-top:12px;">Open full screen</button>
   </section>
+
+  <section id="view-games" class="view">
+    <div class="eyebrow">Play</div>
+    <h2 class="section-title">Games</h2>
+    <div id="games-list"></div>
+    <div class="eyebrow">Now Playing</div>
+    <iframe id="game-frame" class="gotj-frame" title="Game" loading="lazy" allowfullscreen allow="fullscreen; autoplay; gamepad"></iframe>
+    <button class="btn ghost block" id="game-open" style="margin-top:12px;">Open full screen</button>
+  </section>
 </main>
 
 <nav>
@@ -228,10 +237,24 @@ nav button.active{color:var(--blood-bright);}
   <button data-tab="tour"><span class="glyph">&#9650;</span>Tour</button>
   <button data-tab="shop"><span class="glyph">&#9670;</span>Shop</button>
   <button data-tab="media"><span class="glyph">&#9658;</span>Media</button>
+  <button data-tab="games"><span class="glyph">&#9672;</span>Games</button>
   <button data-tab="gotj"><span class="glyph">&#9651;</span>GOTJ</button>
 </nav>
 
 <script>
+(async function(){
+  if (window.top !== window.self) return;
+  if (!('serviceWorker' in navigator)) return;
+  try{
+    if (localStorage.getItem('icp_reset_v1') === '1') return;
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r=>r.unregister()));
+    if (window.caches){ const keys = await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k))); }
+    localStorage.setItem('icp_reset_v1','1');
+    if (regs.length) location.reload();
+  }catch(e){}
+})();
+
 const CONFIG = {
   alert: { text: "GOTJ 2026 \u00b7 AUG 19\u201322 \u00b7 NEW HOME: LAKE OF THE OZARKS, MO", url: "https://juggalogathering.com/" },
   gotjUrl: "https://kirkcreason-dev.github.io/GOTJ/gathering.html",
@@ -313,6 +336,10 @@ const CONFIG = {
     { label:"Facebook", glyph:"&#9612;", url:"https://www.facebook.com/INSANECLOWNPOSSE" },
     { label:"TikTok", glyph:"&#9834;", url:"https://www.tiktok.com/@insaneclownposse" },
     { label:"X", glyph:"&#10006;", url:"https://www.twitter.com/ICP" }
+  ],
+
+  games: [
+    { title:"Big Money Rustlas", sub:"2D platformer \u00b7 Demo", url:"https://kirkcreason-dev.github.io/BigMoneyRustlas/" }
   ]
 };
 
@@ -373,6 +400,22 @@ function mediaRow(m){
     <div class="chev">&rsaquo;</div></div>`;
 }
 
+function gameCard(g){
+  return `<div class="card tap media-row" onclick="playGame('${g.url}')">
+    <div class="ic">&#9672;</div>
+    <div class="lbl"><h3>${g.title}</h3><p>${g.sub}</p></div>
+    <button class="btn sm" onclick="event.stopPropagation();playGame('${g.url}')">Play</button></div>`;
+}
+function loadGameFrame(url){
+  const f=$("game-frame");
+  if(f.getAttribute('src')!==url) f.setAttribute('src', url);
+  $("game-open").onclick = ()=>openUrl(url);
+}
+function playGame(url){
+  loadGameFrame(url);
+  $("game-frame").scrollIntoView({behavior:'smooth', block:'start'});
+}
+
 function renderAll(){
   renderHero();
 
@@ -391,6 +434,8 @@ function renderAll(){
   $("family-list").innerHTML = (CONFIG.family||[]).map(mediaRow).join("");
   $("social-strip").innerHTML = (CONFIG.social||[]).map(s=>
     `<a href="#" onclick="openUrl('${s.url}');return false;"><span class="g">${s.glyph}</span>${s.label}</a>`).join("");
+
+  $("games-list").innerHTML = (CONFIG.games||[]).map(gameCard).join("");
 
   const gi = CONFIG.gotjInfo;
   if(gi){
@@ -419,6 +464,7 @@ function dismissAlert(){ $("alert").classList.add("hide"); }
 function go(tab){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   $("view-"+tab).classList.add("active");
+  if(tab==="games" && CONFIG.games && CONFIG.games[0]) loadGameFrame(CONFIG.games[0].url);
   const hasBtn = [...document.querySelectorAll("nav button")].some(b=>b.dataset.tab===tab);
   document.querySelectorAll("nav button").forEach(b=>
     b.classList.toggle("active", b.dataset.tab===(hasBtn?tab:"home")));
@@ -441,7 +487,7 @@ async function loadRemoteConfig(){
     const snap = await firebase.firestore().collection("icpApp").doc("content").get();
     if(!snap.exists) return;
     const d = snap.data() || {};
-    ["alert","hero","gotjInfo","gotjLinks","gotjLineup","tour","merch","news","music","video","family","social","storeUrl","gotjUrl"]
+    ["alert","hero","gotjInfo","gotjLinks","gotjLineup","tour","merch","news","music","video","family","social","games","storeUrl","gotjUrl"]
       .forEach(k=>{ if(d[k]!==undefined && d[k]!==null) CONFIG[k] = d[k]; });
     renderAll();
   }catch(e){}
