@@ -134,6 +134,17 @@ details.acc[open] summary::after{content:"\2212";}
 .lineup b{color:var(--bone);}
 
 .gotj-frame{width:100%;height:70vh;min-height:420px;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-top:6px;}
+.game-stage{position:relative;margin-top:6px;}
+.game-rotate{display:none;}
+@media (orientation:portrait){
+  .game-stage #game-frame{visibility:hidden;}
+  .game-stage .game-rotate{display:flex;}
+}
+.game-rotate{position:absolute;inset:6px 0 0;z-index:3;border:1px solid var(--line);border-radius:14px;background:var(--surface);
+  flex-direction:column;gap:12px;align-items:center;justify-content:center;text-align:center;padding:24px;line-height:1.25;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:17px;color:var(--smoke);}
+.game-rotate .ic{font-size:40px;color:var(--blood-bright);animation:rot 2.4s ease-in-out infinite;}
+@keyframes rot{0%,40%{transform:rotate(0);}60%,100%{transform:rotate(90deg);}}
 .note{color:var(--smoke);font-size:12px;line-height:1.5;margin:14px 2px 0;text-align:center;}
 
 .social-strip{display:flex;gap:10px;margin-top:4px;}
@@ -227,8 +238,12 @@ nav button.active{color:var(--blood-bright);}
     <h2 class="section-title">Games</h2>
     <div id="games-list"></div>
     <div class="eyebrow">Now Playing</div>
-    <iframe id="game-frame" class="gotj-frame" title="Game" loading="lazy" allowfullscreen allow="fullscreen; autoplay; gamepad"></iframe>
+    <div class="game-stage">
+      <div class="game-rotate"><div class="ic">&#8635;</div>Rotate your device<br>to play</div>
+      <iframe id="game-frame" class="gotj-frame" title="Game" loading="lazy" allowfullscreen allow="fullscreen; autoplay; gamepad"></iframe>
+    </div>
     <button class="btn ghost block" id="game-open" style="margin-top:12px;">Open full screen</button>
+    <p class="note">Best played in landscape, or tap Open full screen.</p>
   </section>
 </main>
 
