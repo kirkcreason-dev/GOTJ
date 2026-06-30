@@ -359,7 +359,9 @@ const CONFIG = {
   ],
 
   games: [
-    { title:"Big Money Rustlas", sub:"2D platformer \u00b7 Demo", url:"https://kirkcreason-dev.github.io/BigMoneyRustlas/" }
+    { title:"Big Money Rustlas", sub:"2D platformer \u00b7 Demo", url:"https://kirkcreason-dev.github.io/BigMoneyRustlas/" },
+    { title:"Carnival Escape", sub:"Coming soon", soon:true },
+    { title:"The Great Milenko", sub:"Coming soon", soon:true }
   ]
 };
 
@@ -373,9 +375,17 @@ function openUrl(url){
 }
 function ph(img){ return img ? `<img src="${img}" alt="" onerror="this.remove()">` : `<img class="hm" src="${HATCHET}" alt="">`; }
 
+const MONTHS={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+function showDate(t){ const now=new Date(); return new Date(now.getFullYear(), (MONTHS[t.month]||0), parseInt(t.day,10)); }
+function nextShow(){
+  const now=new Date(); const today=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const upcoming=(CONFIG.tour||[]).filter(t=>showDate(t)>=today);
+  return upcoming[0] || null;
+}
+
 function renderHero(){
   const h=CONFIG.hero;
-  const next=CONFIG.tour.find(t=>t.status!=="soldout")||CONFIG.tour[0];
+  const next=nextShow();
   const nextLine = next ? `Next: ${next.city} &middot; ${next.month} ${next.day}` : "";
   const img = h.img ? `<img src="${h.img}" alt="Insane Clown Posse" onerror="this.closest('.hero').classList.remove('has-img');this.closest('.hero').classList.add('no-img');this.remove()">` : "";
   const title = h.img ? "" : `<h2>INSANE <em>CLOWN</em> POSSE</h2>`;
@@ -422,28 +432,56 @@ function mediaRow(m){
 }
 
 function gameCard(g){
+  if(g.soon){
+    return `<div class="card media-row" style="opacity:.55;">
+      <div class="ic">&#9672;</div>
+      <div class="lbl"><h3>${g.title}</h3><p>${g.sub}</p></div>
+      <span class="soldout">Coming soon</span></div>`;
+  }
   return `<div class="card tap media-row" onclick="playGame('${g.url}')">
     <div class="ic">&#9672;</div>
     <div class="lbl"><h3>${g.title}</h3><p>${g.sub}</p></div>
     <button class="btn sm" onclick="event.stopPropagation();playGame('${g.url}')">Play</button></div>`;
 }
+let gameLoaded = false, gameUrl = null;
+function isLandscape(){ return window.matchMedia('(orientation: landscape)').matches; }
+function nudgeGameResize(){
+  const f=$("game-frame");
+  try{ f.contentWindow.dispatchEvent(new Event('resize')); }catch(e){}
+}
 function loadGameFrame(url){
   const f=$("game-frame");
-  if(f.getAttribute('src')!==url) f.setAttribute('src', url);
   $("game-open").onclick = ()=>openUrl(url);
+  if(f.getAttribute('src')===url) return;
+  f.onload = ()=>{ nudgeGameResize(); setTimeout(nudgeGameResize, 350); };
+  f.setAttribute('src', url);
+  gameLoaded = true;
+}
+function maybeLoadGame(){
+  const g=(CONFIG.games||[]).find(x=>x.url);
+  if(!(document.body.classList.contains('games-active') && g)) return;
+  gameUrl = g.url;
+  if(isLandscape()){
+    // wait for the landscape full-screen layout to settle so the canvas measures the right size
+    setTimeout(()=>{ if(isLandscape()) gameLoaded ? nudgeGameResize() : loadGameFrame(gameUrl); }, 150);
+  }
 }
 function playGame(url){
-  loadGameFrame(url);
+  gameUrl = url;
+  maybeLoadGame();
   $("game-frame").scrollIntoView({behavior:'smooth', block:'start'});
 }
+window.addEventListener('orientationchange', ()=>setTimeout(maybeLoadGame, 200));
+window.addEventListener('resize', ()=>{ if(gameLoaded && document.body.classList.contains('games-active') && isLandscape()) nudgeGameResize(); });
+
 
 function renderAll(){
   renderHero();
 
   $("home-news").innerHTML = CONFIG.news.slice(0,2).map(newsCard).join("");
   $("news-list").innerHTML = CONFIG.news.map(newsCard).join("");
-  const next = CONFIG.tour.find(t=>t.status!=="soldout") || CONFIG.tour[0];
-  $("home-next").innerHTML = next ? tourRow(next) : `<p class="note">No dates announced yet.</p>`;
+  const next = nextShow();
+  $("home-next").innerHTML = next ? tourRow(next) : `<p class="note">More dates coming soon.</p>`;
 
   $("tour-list").innerHTML = CONFIG.tour.length ? CONFIG.tour.map(tourRow).join("") : `<p class="note">No dates announced yet.</p>`;
 
@@ -457,6 +495,7 @@ function renderAll(){
     `<a href="#" onclick="openUrl('${s.url}');return false;"><span class="g">${s.glyph}</span>${s.label}</a>`).join("");
 
   $("games-list").innerHTML = (CONFIG.games||[]).map(gameCard).join("");
+  const _pg=(CONFIG.games||[]).find(x=>x.url); if(_pg) $("game-open").onclick = ()=>openUrl(_pg.url);
 
   const gi = CONFIG.gotjInfo;
   if(gi){
@@ -486,7 +525,7 @@ function go(tab){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   $("view-"+tab).classList.add("active");
   document.body.classList.toggle("games-active", tab==="games");
-  if(tab==="games" && CONFIG.games && CONFIG.games[0]) loadGameFrame(CONFIG.games[0].url);
+  if(tab==="games") maybeLoadGame();
   const hasBtn = [...document.querySelectorAll("nav button")].some(b=>b.dataset.tab===tab);
   document.querySelectorAll("nav button").forEach(b=>
     b.classList.toggle("active", b.dataset.tab===(hasBtn?tab:"home")));
