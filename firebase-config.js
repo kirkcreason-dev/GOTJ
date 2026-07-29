@@ -13,12 +13,12 @@
    ============================================================ */
 
 var FIREBASE_CONFIG = {
-  apiKey:            "PASTE_API_KEY",
-  authDomain:        "PASTE_PROJECT.firebaseapp.com",
-  projectId:         "PASTE_PROJECT_ID",
-  storageBucket:     "PASTE_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId:             "PASTE_APP_ID"
+  apiKey:            "AIzaSyAQJwpam8ywji-_B1XPskql2Z3sqx4H_2U",
+  authDomain:        "psychopathic-app.firebaseapp.com",
+  projectId:         "psychopathic-app",
+  storageBucket:     "psychopathic-app.firebasestorage.app",
+  messagingSenderId: "463749636495",
+  appId:             "1:463749636495:web:c75ae1b0e0134f78be6bfa"
 };
 
 /* Initializes Firestore only if a real config is present.
