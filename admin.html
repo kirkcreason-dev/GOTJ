@@ -313,5 +313,37 @@ function arrayItem(s, item, i){
   return box;
 }
 </script>
+<div id="pushcard" class="card hidden" style="margin-top:14px;">
+  <div class="section-title"><span class="eb">/</span> Push Notification</div>
+  <p style="font-size:12px;opacity:.75;margin:6px 0 10px;">Sends a notification to every phone with the app installed (requires the push function to be deployed — see backend setup).</p>
+  <label>Title</label>
+  <input id="push-title" maxlength="80" placeholder="GOTJ set times updated" />
+  <label>Message</label>
+  <input id="push-body" maxlength="240" placeholder="Kraken Stage schedule changed — open the app for the new times." />
+  <button id="push-send" class="btn" style="margin-top:10px;">Send push to everyone</button>
+  <span id="push-status" class="status"></span>
+</div>
+<script>
+(function(){
+  var card=document.getElementById('pushcard');
+  var editor=document.getElementById('editor');
+  var obs=new MutationObserver(function(){
+    card.classList.toggle('hidden', editor.classList.contains('hidden'));
+  });
+  obs.observe(editor,{attributes:true,attributeFilter:['class']});
+  card.classList.toggle('hidden', editor.classList.contains('hidden'));
+  document.getElementById('push-send').onclick=function(){
+    var t=document.getElementById('push-title').value.trim();
+    var b=document.getElementById('push-body').value.trim();
+    var st=document.getElementById('push-status');
+    if(!t||!b){st.textContent='Need a title and a message.';return;}
+    if(!confirm('Send this push to EVERY installed app right now?'))return;
+    st.textContent='Sending\u2026';
+    db.collection('push').add({title:t,body:b,at:firebase.firestore.FieldValue.serverTimestamp()})
+      .then(function(){st.textContent='Queued \u2014 phones get it within seconds.';document.getElementById('push-title').value='';document.getElementById('push-body').value='';})
+      .catch(function(e){st.textContent='Failed: '+e.message;});
+  };
+})();
+</script>
 </body>
 </html>
